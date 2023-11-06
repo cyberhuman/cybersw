@@ -121,3 +121,4 @@ class CyberswitchDeviceConfig:
     switch_angle_on: int
     switch_angle_off: int
     switch_delay_ms: int
+    connection_interval_ms: int

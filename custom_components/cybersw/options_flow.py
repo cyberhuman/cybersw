@@ -110,7 +110,8 @@ class CyberswitchOptionsFlow(OptionsFlowWithConfigEntry):
                 switch_angle_midpoint=int(user_input["switch_angle_midpoint"]),
                 switch_angle_on=int(user_input["switch_angle_on"]),
                 switch_angle_off=int(user_input["switch_angle_off"]),
-                switch_delay_ms=int(user_input["switch_delay_ms"])
+                switch_delay_ms=int(user_input["switch_delay_ms"]),
+                connection_interval_ms=int(user_input["connection_interval_ms"])
             )
             return await self.async_step_device_config_wait_write()
 
@@ -154,11 +155,21 @@ class CyberswitchOptionsFlow(OptionsFlowWithConfigEntry):
                     vol.Required(
                         "switch_delay_ms",
                         default=self._config.switch_delay_ms,
-                    #) : vol.All(vol.Coerce(int), vol.Range(min=0, max=1000)),
                     ) : NumberSelector(
                         NumberSelectorConfig(
                             min=0,
                             max=1000,
+                            mode=NumberSelectorMode.BOX,
+                            unit_of_measurement=UnitOfTime.MILLISECONDS,
+                        )
+                    ),
+                    vol.Required(
+                        "connection_interval_ms",
+                        default=self._config.connection_interval_ms,
+                    ) : NumberSelector(
+                        NumberSelectorConfig(
+                            min=0,
+                            max=4000,
                             mode=NumberSelectorMode.BOX,
                             unit_of_measurement=UnitOfTime.MILLISECONDS,
                         )

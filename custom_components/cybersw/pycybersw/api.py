@@ -451,20 +451,23 @@ def unpack_config(data: bytes) -> CyberswitchDeviceConfig:
         switch_angle_off,
         switch_angle_midpoint,
         switch_delay_ms,
-    ) = struct.unpack("<bbbH", data)
+        connection_interval_ms,
+    ) = struct.unpack("<bbbHH", data)
     return CyberswitchDeviceConfig(
         switch_angle_midpoint=switch_angle_midpoint,
         switch_angle_on=switch_angle_on,
         switch_angle_off=switch_angle_off,
         switch_delay_ms=switch_delay_ms,
+        connection_interval_ms=connection_interval_ms,
     )
 
 
 def pack_config(config: CyberswitchDeviceConfig) -> bytes:
     return struct.pack(
-        "<bbbH",
+        "<bbbHH",
         config.switch_angle_on,
         config.switch_angle_off,
         config.switch_angle_midpoint,
         config.switch_delay_ms,
+        config.connection_interval_ms,
     )

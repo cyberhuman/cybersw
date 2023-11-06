@@ -42,7 +42,8 @@
           "switch_angle_on": "Angle of pressure of the \"ON\" position",
           "switch_angle_off": "Angle of pressure of the \"OFF\" position",
           "switch_angle_midpoint": "Angle of the mid-position",
-          "switch_delay_ms": "Delay between changing positions, ms"
+          "switch_delay_ms": "Delay between changing positions, ms",
+          "connection_interval_ms": "BLE connection interval, ms"
         }
       },
       "hass_config": {
