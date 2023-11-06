@@ -432,7 +432,7 @@ def unpack_state(data: bytes) -> CyberswitchDeviceState:
 #    ) = struct.unpack("<BBxBBxxxxxxxxxxxBBBx", data)
     ) = struct.unpack("<B", data)
 
-    night_mode_enabled: bool = light_mode == 0 and light_brightness == 0
+    # night_mode_enabled: bool = light_mode == 0 and light_brightness == 0
 
     return CyberswitchDeviceState(
 #        volume=volume,
@@ -447,21 +447,24 @@ def unpack_state(data: bytes) -> CyberswitchDeviceState:
 
 def unpack_config(data: bytes) -> CyberswitchDeviceConfig:
     (
-        switch_angle,
+        switch_angle_on,
+        switch_angle_off,
         switch_angle_midpoint,
         switch_delay_ms,
-    ) = struct.unpack("<bbH", data)
+    ) = struct.unpack("<bbbH", data)
     return CyberswitchDeviceConfig(
-        switch_angle=switch_angle,
         switch_angle_midpoint=switch_angle_midpoint,
+        switch_angle_on=switch_angle_on,
+        switch_angle_off=switch_angle_off,
         switch_delay_ms=switch_delay_ms,
     )
 
 
 def pack_config(config: CyberswitchDeviceConfig) -> bytes:
     return struct.pack(
-        "<bbH",
-        config.switch_angle,
+        "<bbbH",
+        config.switch_angle_on,
+        config.switch_angle_off,
         config.switch_angle_midpoint,
         config.switch_delay_ms,
     )

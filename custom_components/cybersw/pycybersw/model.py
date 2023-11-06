@@ -117,6 +117,7 @@ UnknownCyberswitchState = CyberswitchDeviceState()
 
 @dataclass
 class CyberswitchDeviceConfig:
-    switch_angle: int
     switch_angle_midpoint: int
+    switch_angle_on: int
+    switch_angle_off: int
     switch_delay_ms: int
