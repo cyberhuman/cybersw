@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 
-from homeassistant.components.cybersw.pycybersw.advertisement import parse_cyberswitch_advertisement
+from .pycybersw.advertisement import parse_cyberswitch_advertisement
 
 from .pycybersw.device import CyberswitchDevice
 
