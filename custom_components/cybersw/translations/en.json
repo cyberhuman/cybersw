@@ -1,5 +1,5 @@
 {
-  "title": "CyberSW Integration TITLE",
+  "title": "CyberSW",
   "config": {
     "flow_title": "[%key:component::bluetooth::config::flow_title%]",
     "step": {
