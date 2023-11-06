@@ -1,9 +1,9 @@
-"""Constants for cybersw."""
-from logging import Logger, getLogger
+"""Constants for the CyberSW integration."""
 
-LOGGER: Logger = getLogger(__package__)
+from homeassistant.const import Platform
 
-NAME = "Integration blueprint"
 DOMAIN = "cybersw"
-VERSION = "0.0.0"
-ATTRIBUTION = "Data provided by http://jsonplaceholder.typicode.com/"
+PLATFORMS: list[Platform] = [Platform.SWITCH]
+
+OPTION_IDLE_DISCONNECT_DELAY = "idle_disconnect_delay_ms"
+DEFAULT_IDLE_DISCONNECT_DELAY = -1

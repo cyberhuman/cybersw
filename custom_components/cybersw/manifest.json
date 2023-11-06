@@ -1,12 +1,24 @@
 {
   "domain": "cybersw",
-  "name": "Integration blueprint",
-  "codeowners": [
-    "@ludeeus"
+  "name": "CyberSW",
+  "bluetooth": [
+    {
+      "local_name": "CySW*"
+    },
+    {
+      "service_uuid": "79819fbc-5a64-43bc-9e88-0f3d761c673c"
+    }
   ],
+  "codeowners": ["@cyberhuman"],
   "config_flow": true,
-  "documentation": "https://github.com/ludeeus/cybersw",
-  "iot_class": "cloud_polling",
-  "issue_tracker": "https://github.com/ludeeus/cybersw/issues",
-  "version": "0.0.0"
+  "dependencies": ["bluetooth_adapters"],
+  "documentation": "https://www.home-assistant.io/integrations/cybersw",
+  "integration_type": "hub",
+  "iot_class": "local_push",
+  "requirements": [
+    "bleak-retry-connector==3.2.1",
+    "bleak==0.21.1",
+    "events==0.4",
+    "transitions==0.8.11"
+  ]
 }

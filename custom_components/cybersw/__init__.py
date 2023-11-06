@@ -1,55 +1,87 @@
-"""Custom integration to integrate cybersw with Home Assistant.
-
-For more details about this integration, please refer to
-https://github.com/ludeeus/cybersw
-"""
+"""The CyberSW integration."""
 from __future__ import annotations
 
+import logging
+
+from homeassistant.components.cybersw.pycybersw.advertisement import parse_cyberswitch_advertisement
+
+from .pycybersw.device import CyberswitchDevice
+
+from homeassistant.components.bluetooth import (
+    async_ble_device_from_address,
+    #async_scanner_devices_by_address,
+    async_last_service_info,
+)
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_PASSWORD, CONF_USERNAME, Platform
+from homeassistant.const import (
+    CONF_ADDRESS,
+    # CONF_TOKEN,
+)
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.exceptions import ConfigEntryNotReady
 
-from .api import IntegrationBlueprintApiClient
-from .const import DOMAIN
-from .coordinator import BlueprintDataUpdateCoordinator
-
-PLATFORMS: list[Platform] = [
-    Platform.SENSOR,
-    Platform.BINARY_SENSOR,
-    Platform.SWITCH,
-]
+from .const import (
+    DOMAIN,
+    PLATFORMS,
+    OPTION_IDLE_DISCONNECT_DELAY,
+    DEFAULT_IDLE_DISCONNECT_DELAY,
+)
+from .models import CyberswitchConfigurationData
 
 
-# https://developers.home-assistant.io/docs/config_entries_index/#setting-up-an-entry
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up this integration using UI."""
-    hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = coordinator = BlueprintDataUpdateCoordinator(
-        hass=hass,
-        client=IntegrationBlueprintApiClient(
-            username=entry.data[CONF_USERNAME],
-            password=entry.data[CONF_PASSWORD],
-            session=async_get_clientsession(hass),
-        ),
+    """Set up Cyberswitch device from a config entry."""
+    address: str = entry.data[CONF_ADDRESS]
+    #token: str = entry.data[CONF_TOKEN]
+
+    # transitions info logs are verbose. Only enable warnings
+    logging.getLogger("transitions.core").setLevel(logging.WARNING)
+
+    if not (ble_device := async_ble_device_from_address(hass, address)):
+        raise ConfigEntryNotReady(
+            f"Could not find CyberSW with address {address}. Try power cycling the device"
+        )
+    if not (info := async_last_service_info(hass, address)):
+        raise ConfigEntryNotReady(
+            f"Could not find CyberSW service info for {address}. Try power cycling the device"
+        )
+
+    advertisement = parse_cyberswitch_advertisement(info)
+    device = CyberswitchDevice(
+        ble_device,
+        advertisement,
+        idle_disconnect_delay_ms=entry.options.get(OPTION_IDLE_DISCONNECT_DELAY, DEFAULT_IDLE_DISCONNECT_DELAY)
     )
-    # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
-    await coordinator.async_config_entry_first_refresh()
+
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = CyberswitchConfigurationData(
+        ble_device,
+        device,
+        entry.title
+    )
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-    entry.async_on_unload(entry.add_update_listener(async_reload_entry))
-
+    entry.async_on_unload(entry.add_update_listener(_async_update_listener))
     return True
 
 
+async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Handle options update."""
+    data: CyberswitchConfigurationData = hass.data[DOMAIN][entry.entry_id]
+    if entry.title != data.title or entry.options.get(OPTION_IDLE_DISCONNECT_DELAY, DEFAULT_IDLE_DISCONNECT_DELAY) != data.device.idle_disconnect_delay_ms:
+        await hass.config_entries.async_reload(entry.entry_id)
+
+
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Handle removal of an entry."""
-    if unloaded := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
+    """Unload a config entry."""
+    if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
+        data: CyberswitchConfigurationData = hass.data[DOMAIN][entry.entry_id]
+
+        # also called by switch entities, but do it here too for good measure
+        await data.device.async_disconnect()
+
         hass.data[DOMAIN].pop(entry.entry_id)
-    return unloaded
 
+        if not hass.config_entries.async_entries(DOMAIN):
+            hass.data.pop(DOMAIN)
 
-async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Reload config entry."""
-    await async_unload_entry(hass, entry)
-    await async_setup_entry(hass, entry)
+    return unload_ok
