@@ -335,12 +335,12 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
                 use_services_cache=True,
                 ble_device_callback=get_ble_device,
             )
-            _LOGGER.info(f"_async_wait_for_pairing_mode got {client=}")
+            _LOGGER.info(f"_async_wait_for_pairing got {client=}")
             try:
                 if not await client.pair():
-                    _LOGGER.info(f"_async_wait_for_pairing_mode pairing failed")
+                    _LOGGER.info(f"_async_wait_for_pairing pairing failed")
                     raise DevicePairingError()
-                _LOGGER.info(f"_async_wait_for_pairing_mode pairing succeeded (?)")
+                _LOGGER.info(f"_async_wait_for_pairing pairing succeeded (?)")
             finally:
                 await client.disconnect()
             #client = BleakClient(ble_device) #, disconnected_callback=)
@@ -350,7 +350,7 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
             #except asyncio.TimeoutError as exc:
             #    raise exc
         finally:
-            _LOGGER.info(f"_async_wait_for_pairing_mode finally")
+            _LOGGER.info(f"_async_wait_for_pairing finally")
             self.hass.async_create_task(
                 self.hass.config_entries.flow.async_configure(flow_id=self.flow_id)
             )
