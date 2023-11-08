@@ -253,7 +253,7 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
     ) -> FlowResult:
         """Inform the user that the device failed pairing."""
         if user_input is not None:
-            return await self.async_step_wait_for_pairing()
+            return await self.async_step_wait_for_pairing_mode()
 
         self._set_confirm_only()
         return self.async_show_form(step_id="pairing_timeout")
