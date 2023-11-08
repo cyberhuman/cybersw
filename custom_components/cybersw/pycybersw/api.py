@@ -13,7 +13,7 @@ from bleak.exc import BleakDBusError
 from events import Events
 
 from .const import (
-    SEND_COMMAND_CHARACTERISTIC,
+    SWITCH_STATE_CHARACTERISTIC,
     WRITE_CONFIG_CHARACTERISTIC,
     READ_CONFIG_CHARACTERISTIC,
 
@@ -138,7 +138,7 @@ class CyberswitchDeviceApi:
         self._client = client
         self._write_lock = Lock()
         self._ = format_log_message or (lambda msg: msg)
-        self._send_command_char = CharacteristicReference(SEND_COMMAND_CHARACTERISTIC)
+        self._switch_state_char = CharacteristicReference(SWITCH_STATE_CHARACTERISTIC)
         self._write_config_char = CharacteristicReference(WRITE_CONFIG_CHARACTERISTIC)
         self._read_config_char = CharacteristicReference(READ_CONFIG_CHARACTERISTIC)
         #self._read_state_char = CharacteristicReference(READ_STATE_CHARACTERISTIC)
@@ -277,7 +277,7 @@ class CyberswitchDeviceApi:
         client = self._require_client()
 
         data = await client.read_gatt_char(
-            self._read_state_char.get(client), use_cached=use_cached
+            self._switch_state_char.get(client), use_cached=use_cached
         )
         return unpack_state(data)
 
@@ -291,19 +291,19 @@ class CyberswitchDeviceApi:
             self.events.on_state_patched(unpack_state(payload))
 
         await client.start_notify(
-            self._read_state_char.get(client),
+            self._switch_state_char.get(client),
             on_state_change,
         )
 
-        def on_response_command(_: BleakClient, data: bytes) -> None:
-            command = ResponseCommand(data[0])
-            payload = data[1:]
+        # def on_response_command(_: BleakClient, data: bytes) -> None:
+        #     command = ResponseCommand(data[0])
+        #     payload = data[1:]
 
-            self.events.on_state_patched(unpack_response_command(command, payload))
+        #     self.events.on_state_patched(unpack_response_command(command, payload))
 
-        await client.start_notify(
-            self._read_command_char.get(client), on_response_command
-        )
+        # await client.start_notify(
+        #     self._read_command_char.get(client), on_response_command
+        # )
 
     #async def async_request_other_settings(self) -> None:
     #    await self._async_write_state(bytes([Command.REQUEST_OTHER_SETTINGS]))
@@ -343,7 +343,7 @@ class CyberswitchDeviceApi:
                         raise
 
     async def _async_send_command(self, data: bytes) -> None:
-        await self._async_write_data(self._send_command_char, data)
+        await self._async_write_data(self._switch_state_char, data)
 
     async def _async_write_config_command(self, data: bytes) -> None:
         await self._async_write_data(self._write_config_char, data)

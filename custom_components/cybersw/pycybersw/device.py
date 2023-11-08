@@ -415,8 +415,8 @@ class CyberswitchDevice:
         #        raise ValueError("Missing device password")
         #    await api.async_authenticate_connection(self._adv_data.password)
 
-        #if self.connection_status == CyberswitchConnectionStatus.CONNECTING:
-        #    await api.async_subscribe()
+        if self.connection_status == CyberswitchConnectionStatus.CONNECTING:
+            await api.async_subscribe()
 
         if self.connection_status == CyberswitchConnectionStatus.CONNECTING:
             self._machine.connection_ready()
