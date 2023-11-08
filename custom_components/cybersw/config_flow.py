@@ -38,10 +38,9 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 
 from bleak_retry_connector import (
-    BleakAbortedError,
-    BleakClientWithServiceCache,
-    BleakConnectionError,
-    BleakNotFoundError,
+    #BleakAbortedError,
+    #BleakConnectionError,
+    #BleakNotFoundError,
     establish_connection,
 )
 
@@ -328,7 +327,7 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
                 return ble_device
 
             client = await establish_connection(
-                BleakClientWithServiceCache,
+                BleakClient,
                 get_ble_device(),
                 get_device_display_name(self._discovery.info.name, self._discovery.info.address),
                 disconnected_callback=None,
@@ -337,6 +336,8 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
             )
             _LOGGER.info(f"_async_wait_for_pairing got {client=}")
             try:
+                cache_cleared = await client.clear_cache();
+                _LOGGER.info(f"_async_wait_for_pairing {cache_cleared=}")
                 if not await client.pair():
                     _LOGGER.info(f"_async_wait_for_pairing pairing failed")
                     raise DevicePairingError()
