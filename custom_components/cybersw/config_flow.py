@@ -6,7 +6,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from bleak import BleakClient
+#from bleak import BleakClient
 
 #from .pycybersw.advertisement import CyberswitchAdvertisementData
 from .pycybersw.advertisement import (
@@ -38,6 +38,7 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 
 from bleak_retry_connector import (
+    BleakClientWithServiceCache,
     #BleakAbortedError,
     #BleakConnectionError,
     #BleakNotFoundError,
@@ -327,7 +328,7 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
                 return ble_device
 
             client = await establish_connection(
-                BleakClient,
+                BleakClientWithServiceCache,
                 get_ble_device(),
                 get_device_display_name(self._discovery.info.name, self._discovery.info.address),
                 disconnected_callback=None,

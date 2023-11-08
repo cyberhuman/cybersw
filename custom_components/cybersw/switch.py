@@ -19,7 +19,7 @@ from .pycybersw.commands import (
     turn_on,
 )
 
-from bleak import BleakClient
+#from bleak import BleakClient
 
 import voluptuous as vol
 
