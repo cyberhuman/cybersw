@@ -3,27 +3,16 @@ import asyncio
 import logging
 from typing import Any
 
-from .pycybersw.advertisement import (
-    parse_cyberswitch_advertisement,
-    get_device_display_name
-)
-from .pycybersw.device import CyberswitchDevice
 from .pycybersw.model import CyberswitchDeviceConfig
-from homeassistant.components.bluetooth import (
-    async_ble_device_from_address,
-    async_last_service_info,
-)
 from homeassistant.config_entries import (
     ConfigEntry,
     OptionsFlowWithConfigEntry,
 )
 from homeassistant.const import (
-    CONF_ADDRESS,
     DEGREE,
     UnitOfTime,
 )
 from homeassistant.data_entry_flow import FlowResult
-from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.selector import (
     NumberSelector,
     NumberSelectorConfig,

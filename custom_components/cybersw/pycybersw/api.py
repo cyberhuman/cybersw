@@ -6,7 +6,7 @@ import struct
 from asyncio import Lock
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import Callable
+from collections.abc import Callable
 
 from bleak import BleakClient, BleakGATTCharacteristic
 from bleak.exc import BleakDBusError
@@ -106,7 +106,7 @@ class ResponseCommand(IntEnum):
 
 
 class MissingCharacteristicError(Exception):
-    """Raised when a required characteristic is missing on a client"""
+    """Raised when a required characteristic is missing on a client."""
 
     def __init__(self, uuid: str | None = None) -> None:
         super().__init__(f"Missing characteristic {uuid}")
@@ -223,7 +223,7 @@ class CyberswitchDeviceApi:
 #    async def async_set_light_brightness(self, brightness: int) -> None:
 #        if brightness < 0 or brightness > 100:
 #            raise ValueError(f"Brightness must be between 0 and 100 - got {brightness}")
-# 
+#
 #        button_triggered_brightness = 0 if brightness == 0 else brightness + 10
 #        await self._async_write_state(
 #            bytes(
@@ -235,41 +235,41 @@ class CyberswitchDeviceApi:
 #                ]
 #            )
 #        )
-# 
+#
 #    async def async_set_night_mode_enabled(
 #        self, enabled: bool, brightness: int
 #    ) -> None:
 #        await self._async_write_state(
 #            bytes([Command.NIGHTLIGHT, 0 if enabled else 1, 0, brightness])
 #        )
-# 
+#
 #    async def async_set_fan_power(self, on: bool) -> None:
 #        await self._async_write_state(bytes([Command.FAN_ENABLED, 1 if on else 0]))
-# 
+#
 #    async def async_set_auto_temp_enabled(self, on: bool) -> None:
 #        await self._async_write_state(
 #            bytes([Command.AUTO_TEMP_ENABLED, 1 if on else 0])
 #        )
 #        await self.async_request_other_settings()
-# 
+#
 #    async def async_set_volume(self, volume: int) -> None:
 #        if volume < 0 or volume > 100:
 #            raise ValueError(f"Volume must be between 0 and 100 - got {volume}")
-# 
+#
 #        await self._async_write_state(bytes([Command.MOTOR_SPEED, volume]))
-# 
+#
 #    async def async_set_fan_speed(self, speed: int) -> None:
 #        if speed < 0 or speed > 100:
 #            raise ValueError(f"Speed must be between 0 and 100 - got {speed}")
-# 
+#
 #        await self._async_write_state(bytes([Command.FAN_SPEED, speed]))
-# 
+#
 #    async def async_set_auto_temp_threshold(self, threshold_f: int) -> None:
 #        if threshold_f < 0 or threshold_f > 100:
 #            raise ValueError(
 #                f"Temperature must be between 0 and 100 - got {threshold_f}"
 #            )
-# 
+#
 #        await self._async_write_state(bytes([Command.AUTO_TEMP_THRESHOLD, threshold_f]))
 #        await self.async_request_other_settings()
 #
@@ -410,13 +410,13 @@ def unpack_response_command(command: ResponseCommand, data: bytes) -> Cyberswitc
 
 #    if command == ResponseCommand.SEND_OTHER_SETTINGS:
 #        (auto_enabled, target_temperature) = struct.unpack("<xxxxxxxxxxBB", data[0:12])
-# 
+#
 #        result.fan_auto_enabled = bool(auto_enabled)
 #        result.target_temperature = target_temperature
 #    if command == ResponseCommand.TEMPERATURE:
 #        [temp] = struct.unpack("<f", data[0:4])
 #        result.temperature = round(temp, 2)
-# 
+#
     return result
 
 

@@ -5,7 +5,8 @@ import logging
 from asyncio import AbstractEventLoop, CancelledError, Event, Lock, Task
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable
+from typing import Any
+from collections.abc import Callable
 
 from bleak.backends.device import BLEDevice
 from bleak_retry_connector import (
@@ -219,8 +220,7 @@ class CyberswitchDevice:
     def subscribe_to_state_change(
         self, callback: Callable[[], None]
     ) -> Callable[[], None]:
-        """
-        Subscribe to device state and connection status change.
+        """Subscribe to device state and connection status change.
         Returns a callback to unsubscribe.
         """
 

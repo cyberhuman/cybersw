@@ -66,7 +66,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up CyberSW device from a config entry."""
 
-    platform = entity_platform.async_get_current_platform()
+    entity_platform.async_get_current_platform()
 #    platform.xsync_register_entity_service(
 #        SERVICE_TRANSITION_ON,
 #        {
@@ -191,13 +191,13 @@ class CyberswitchSwitch(SwitchEntity, RestoreEntity):
 #        await self._async_execute_command(
 #            set_volume(percentage) if percentage > 0 else turn_off()
 #        )
-# 
+#
 #    async def async_transition_on(self, duration: int, **kwargs: Any) -> None:
 #        """Transition on the device."""
 #        await self._async_execute_command(
 #            turn_on(volume=kwargs.get("volume"), duration=timedelta(seconds=duration))
 #        )
-# 
+#
 #    async def async_transition_off(self, duration: int, **kwargs: Any) -> None:
 #        """Transition off the device."""
 #        await self._async_execute_command(

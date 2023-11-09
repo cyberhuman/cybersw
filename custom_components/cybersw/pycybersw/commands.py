@@ -6,7 +6,8 @@ from asyncio import AbstractEventLoop, CancelledError, Future, Lock, Task
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum, IntEnum
-from typing import Any, Callable
+from typing import Any
+from collections.abc import Callable
 
 from transitions import Machine, State
 
@@ -40,10 +41,10 @@ class CyberswitchCommandData:
 #    light_brightness: int | None = None
 #    night_mode_enabled: bool | None = None
 #    night_mode_brightness: int | None = None
-# 
+#
 #    # duration to transition target values
     duration: timedelta | None = None
-# 
+#
 #    # Breez only properties
 #    fan_on: bool | None = None
 #    fan_speed: int | None = None
@@ -60,32 +61,32 @@ class CyberswitchCommandData:
 
 #        if self.fan_on is not None:
 #            operations += ["TurnOnFan"] if self.fan_on else ["TurnOffFan"]
-# 
+#
 #        if self.light_on is not None:
 #            operations += ["TurnOnLight"] if self.light_on else ["TurnOffLight"]
-# 
+#
 #        if self.light_brightness is not None:
 #            operations += [f"SetLightBrightness({self.light_brightness})"]
-# 
+#
 #        if self.night_mode_enabled is not None:
 #            night_mode = (
 #                f"{'Enable' if self.night_mode_enabled else 'Disable'}NightMode"
 #            )
-# 
+#
 #            if self.night_mode_brightness is not None:
 #                night_mode += f"({self.night_mode_brightness}%)"
-# 
+#
 #            operations += [night_mode]
-# 
+#
 #        if self.volume is not None:
 #            operations += [f"SetVolume({self.volume}%)"]
-# 
+#
 #        if self.fan_speed is not None:
 #            operations += [f"SetFanSpeed({self.fan_speed}%)"]
-# 
+#
 #        if self.temp_target is not None:
 #            operations += [f"SetTargetTemperature({self.temp_target})"]
-# 
+#
         if self.duration is not None:
             operations += [f"transition {self.duration}"]
 

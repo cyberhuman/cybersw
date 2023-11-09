@@ -159,7 +159,7 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
                 _LOGGER.info(f"couldn't parse device {address} advertisement")
             else:
                 #assert device.display_name
-                display_name = get_device_display_name(info.name, address)
+                get_device_display_name(info.name, address)
                 #self._discovered_devices[display_name] = DiscoveredCyberswitch(
                 self._discovered_devices[address] = DiscoveredCyberswitch(
                     info, device
@@ -237,7 +237,7 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
             try:
                 await self._pairing_task
             finally:
-                _LOGGER.info(f"async_step_wait_for_pairing finalize")
+                _LOGGER.info("async_step_wait_for_pairing finalize")
                 self._pairing_task = None
         except (asyncio.TimeoutError, DeviceDisappearedError, DevicePairingError) as exn:
             _LOGGER.info(f"async_step_wait_for_pairing got error {exn=}")
@@ -245,7 +245,7 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
         except Exception as exn:
             _LOGGER.info(f"async_step_wait_for_pairing got general error {exn=}")
             return self.async_show_progress_done(next_step_id="pairing_timeout")  #  FIXME
-        _LOGGER.info(f"async_step_wait_for_pairing pairing complete")
+        _LOGGER.info("async_step_wait_for_pairing pairing complete")
         return self.async_show_progress_done(next_step_id="pairing_complete")
 
     async def async_step_pairing_timeout(
@@ -317,10 +317,10 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
         """Wait until pairing is complete."""
         assert self._discovery
         #device = self._discovery.device
-        _LOGGER.info(f"_async_wait_for_pairing")
+        _LOGGER.info("_async_wait_for_pairing")
         try:
             def get_ble_device():
-                _LOGGER.info(f"_async_wait_for_pairing get_ble_device")
+                _LOGGER.info("_async_wait_for_pairing get_ble_device")
                 ble_device = async_ble_device_from_address(self.hass, self._discovery.info.address, connectable=True)
                 _LOGGER.info(f"_async_wait_for_pairing get_ble_device got {ble_device=}")
                 if not ble_device:
@@ -337,12 +337,12 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
             )
             _LOGGER.info(f"_async_wait_for_pairing got {client=}")
             try:
-                cache_cleared = await client.clear_cache();
+                cache_cleared = await client.clear_cache()
                 _LOGGER.info(f"_async_wait_for_pairing {cache_cleared=}")
                 if not await client.pair():
-                    _LOGGER.info(f"_async_wait_for_pairing pairing failed")
+                    _LOGGER.info("_async_wait_for_pairing pairing failed")
                     raise DevicePairingError()
-                _LOGGER.info(f"_async_wait_for_pairing pairing succeeded (?)")
+                _LOGGER.info("_async_wait_for_pairing pairing succeeded (?)")
             finally:
                 await client.disconnect()
             #client = BleakClient(ble_device) #, disconnected_callback=)
@@ -352,7 +352,7 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
             #except asyncio.TimeoutError as exc:
             #    raise exc
         finally:
-            _LOGGER.info(f"_async_wait_for_pairing finally")
+            _LOGGER.info("_async_wait_for_pairing finally")
             self.hass.async_create_task(
                 self.hass.config_entries.flow.async_configure(flow_id=self.flow_id)
             )

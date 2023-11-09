@@ -4,7 +4,7 @@ import asyncio
 import logging
 from asyncio import AbstractEventLoop, Task
 from datetime import datetime, timedelta
-from typing import Awaitable, Callable
+from collections.abc import Awaitable, Callable
 
 UPDATES_PER_SECOND = 6
 
