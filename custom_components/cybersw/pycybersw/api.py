@@ -22,10 +22,7 @@ from .const import (
     # HARDWARE_REVISION_CHARACTERISTIC,
     # MANUFACTURER_NAME_CHARACTERISTIC,
     # MODEL_NUMBER_CHARACTERISTIC,
-    # READ_COMMAND_CHARACTERISTIC,
-    # READ_STATE_CHARACTERISTIC,
     # SOFTWARE_REVISION_CHARACTERISTIC,
-    # WRITE_STATE_CHARACTERISTIC,
 )
 from .model import (
     CyberswitchDeviceCharacteristicData,
@@ -56,49 +53,14 @@ _LOGGER = logging.getLogger(__name__)
 
 class Command(IntEnum):
     #MOTOR_SPEED = 1
-    #MOTOR_ENABLED = 2
-    #TOP_LED = 3
-    #BOTTOM_LED = 4
-    #TURN_OFF_TIMER = 5
-    #PASSWORD = 6
-    #UPDATE_STATUS = 7
-    #TURN_ON_TIMER = 8
-    #SET_ON_TIMERS = 9
-    #SET_OFF_TIMERS = 10
-    #SYNC_TIME = 11
-    #SCHEDULE_REQUEST = 12
-    #NIGHTLIGHT = 13
-    #FADE_ON_TIME = 14
-    #FADE_OFF_TIME = 15
-    #REQUEST_FADE_TIMES = 16
-    #CAPBUTTON_POWER = 17
-    #CAPBUTTON_FASTER = 18
-    #CAPBUTTON_SLOWER = 19
-    #CAPBUTTON_NIGHTLIGHT = 20
-    #CAPBUTTON_DEBOUNCE = 21
-    #CAPBUTTON_SAMPLE_ARRAY = 22
-    #REQUEST_CAPBUTTON = 23
-    #CAPBUTTON_IIR_CO = 24
-    #SMARTPLUG_MODE = 25
-    #SET_FADE_SETTINGS = 26
-    #REQUEST_OTHER_SETTINGS = 27
-    #SET_TIMEZONE = 28
-    #SET_TIMEZONE_2 = 29
-    #SET_REAL_TIME = 30
-    #FAN_SPEED = 31
-    #FAN_ENABLED = 32
-    #AUTO_TEMP_ENABLED = 33
-    #AUTO_TEMP_THRESHOLD = 34
+    # ...
     #ENABLE_LAST_POWERED_STATE = 35
     SWITCH = 0
 
 
 class ResponseCommand(IntEnum):
     #SEND_ON_SCHEDULE = 1
-    #SEND_OFF_SCHEDULE = 2
-    #SEND_FADE_SETTINGS = 3
-    #SEND_NIGHTLIGHT = 4
-    #SEND_CAPBUTTON = 5
+    # ...
     #SEND_OTHER_SETTINGS = 6
     #OTA_IDX = 7
     #OTA_FAILED = 8
@@ -207,11 +169,6 @@ class CyberswitchDeviceApi:
 
         return CyberswitchDeviceCharacteristicData(*string_props)  # type: ignore
 
-#    async def async_authenticate_connection(self, password: str) -> None:
-#        await self._async_write_state(
-#            bytes([Command.PASSWORD, *bytes.fromhex(password)])
-#        )
-#
     async def async_set_power(self, on: bool) -> None:
         #await self._async_write_state(bytes([Command.MOTOR_ENABLED, 1 if on else 0]))
         await self._async_send_command(bytes([
@@ -368,42 +325,6 @@ class CyberswitchDeviceApi:
     async def async_restore_config(self) -> None:
         await self._async_write_config_command(bytes([ 0x81 ]))
 
-
-#    async def _async_write_state(self, data: bytes) -> None:
-#        client = self._require_client(False)
-#
-#        attempts = 0
-#
-#        async with self._write_lock:
-#            last_ex: BleakDBusError | None = None
-#
-#            while client.is_connected and attempts <= RETRY_WRITE_FAILURE_COUNT:
-#                try:
-#                    message = f"write {data.hex('-')}"
-#                    if attempts > 0 and last_ex is not None:
-#                        message += f" (attempt {attempts+1}, last error: {last_ex})"
-#                    _LOGGER.debug(self._(message))
-#                    await client.write_gatt_char(
-#                        self._write_state_char.get(client), data, response=True
-#                    )
-#                    return
-#                except BleakDBusError as ex:
-#                    last_ex = ex
-#                    if ex.dbus_error in DBUS_ERRORS_TO_RETRY:
-#                        sleep_duration = RETRY_SLEEP_DURATIONS[
-#                            attempts % len(RETRY_SLEEP_DURATIONS)
-#                        ]
-#                        attempts += 1
-#
-#                        if attempts > RETRY_WRITE_FAILURE_COUNT:
-#                            raise Exception(
-#                                f"Got transient error {attempts} times"
-#                            ) from ex
-#
-#                        await asyncio.sleep(sleep_duration)
-#                    else:
-#                        raise
-#
 
 def unpack_response_command(command: ResponseCommand, data: bytes) -> CyberswitchDeviceState:
     result = CyberswitchDeviceState()

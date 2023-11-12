@@ -18,7 +18,6 @@ from homeassistant.components.bluetooth import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     CONF_ADDRESS,
-    # CONF_TOKEN,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
@@ -36,7 +35,6 @@ from .coordinator import CyberswitchCoordinator
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Cyberswitch device from a config entry."""
     address: str = entry.data[CONF_ADDRESS]
-    #token: str = entry.data[CONF_TOKEN]
 
     # transitions info logs are verbose. Only enable warnings
     logging.getLogger("transitions.core").setLevel(logging.WARNING)

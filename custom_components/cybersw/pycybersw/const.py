@@ -33,26 +33,12 @@ FIRMWARE_PAIRING_FLAGS = 0x01
 FIRMWARE_VERSION_BY_FLAGS = {
     0x00: CyberswitchFirmwareVersion.V1,
 #    0x04: CyberswitchFirmwareVersion.V2,
-#    0x08: CyberswitchFirmwareVersion.V3,
-#    0x0C: CyberswitchFirmwareVersion.V4,
-#    0x10: CyberswitchFirmwareVersion.V5,
-#    0x14: CyberswitchFirmwareVersion.V6,
-#    0x18: CyberswitchFirmwareVersion.V7,
-#    0x1C: CyberswitchFirmwareVersion.V8,
-#    0x20: CyberswitchFirmwareVersion.V9,
-#    0x24: CyberswitchFirmwareVersion.V10,
-#    0x28: CyberswitchFirmwareVersion.V11,
-#    0x2C: CyberswitchFirmwareVersion.V12,
-#    0x30: CyberswitchFirmwareVersion.V13,
-#    0x34: CyberswitchFirmwareVersion.V14,
+#    ...
 #    0x38: CyberswitchFirmwareVersion.V15,
 }
 SUPPORTED_FIRMWARE_VERSIONS = [
     CyberswitchFirmwareVersion.V1,
-#    CyberswitchFirmwareVersion.V2,
-#    CyberswitchFirmwareVersion.V3,
-#    CyberswitchFirmwareVersion.V4,
-#    CyberswitchFirmwareVersion.V5,
+#    ...
 #    CyberswitchFirmwareVersion.V6,
 ]
 

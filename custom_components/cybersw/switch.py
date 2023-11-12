@@ -16,8 +16,6 @@ from .pycybersw.commands import (
     turn_on,
 )
 
-#from bleak import BleakClient
-
 import voluptuous as vol
 
 #from homeassistant.components.fan import ATTR_PERCENTAGE, FanEntity, FanEntityFeature

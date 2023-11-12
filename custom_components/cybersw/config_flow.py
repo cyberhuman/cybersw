@@ -32,7 +32,6 @@ from homeassistant.config_entries import (
 from homeassistant.const import (
     CONF_ADDRESS,
     #CONF_NAME,
-    #CONF_TOKEN,
 )
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
@@ -280,7 +279,6 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
             title=display_name,
             data={
                 CONF_ADDRESS: discovery.info.address,
-                #CONF_TOKEN: discovery.device.pairing_token,
             },
             options={
                 OPTION_IDLE_DISCONNECT_DELAY: DEFAULT_IDLE_DISCONNECT_DELAY,
@@ -345,37 +343,11 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
                 _LOGGER.info("_async_wait_for_pairing pairing succeeded (?)")
             finally:
                 await client.disconnect()
-            #client = BleakClient(ble_device) #, disconnected_callback=)
-            #async with asyncio_timeout(WAIT_FOR_PAIRING_TIMEOUT):
-            #    await client.connect(timeout=CONNECT_TIMEOUT)
-            #    paired = await client.pair()
-            #except asyncio.TimeoutError as exc:
-            #    raise exc
         finally:
             _LOGGER.info("_async_wait_for_pairing finally")
             self.hass.async_create_task(
                 self.hass.config_entries.flow.async_configure(flow_id=self.flow_id)
             )
-        # def is_device_in_pairing_mode(
-        #     service_info: BluetoothServiceInfo,
-        # ) -> bool:
-        #     #return device.supported(service_info) and device.is_pairing
-        #     flags = parse_cyberswitch_advertisement(service_info)
-        #     _LOGGER.info(f"{flags is not None=} is_device_in_pairing_mode={flags is not None and flags.is_pairing}")
-        #     return flags is not None and flags.is_pairing
-
-        # try:
-        #     await async_process_advertisements(
-        #         self.hass,
-        #         is_device_in_pairing_mode,
-        #         {"address": self._discovery.info.address},
-        #         BluetoothScanningMode.ACTIVE,
-        #         WAIT_FOR_PAIRING_TIMEOUT,
-        #     )
-        # finally:
-        #     self.hass.async_create_task(
-        #         self.hass.config_entries.flow.async_configure(flow_id=self.flow_id)
-        #     )
 
     @staticmethod
     @callback
