@@ -17,6 +17,7 @@ from .const import (
     WRITE_CONFIG_CHARACTERISTIC,
     READ_CONFIG_CHARACTERISTIC,
     BATTERY_CHARACTERISTIC,
+    UPTIME_CHARACTERISTIC,
 
     # FIRMWARE_REVISION_CHARACTERISTIC,
     # HARDWARE_REVISION_CHARACTERISTIC,
@@ -105,6 +106,7 @@ class CyberswitchDeviceApi:
         self._write_config_char = CharacteristicReference(WRITE_CONFIG_CHARACTERISTIC)
         self._read_config_char = CharacteristicReference(READ_CONFIG_CHARACTERISTIC)
         self._battery_char = CharacteristicReference(BATTERY_CHARACTERISTIC)
+        self._uptime_char = CharacteristicReference(UPTIME_CHARACTERISTIC)
         self._info_chars = [
         #    CharacteristicReference(MANUFACTURER_NAME_CHARACTERISTIC),
         #    CharacteristicReference(MODEL_NUMBER_CHARACTERISTIC),
@@ -251,20 +253,10 @@ class CyberswitchDeviceApi:
             self._battery_char.get(client),
             lambda _, payload: self.events.on_state_patched(unpack_battery_state(payload))
         )
-
-        # def on_response_command(_: BleakClient, data: bytes) -> None:
-        #     command = ResponseCommand(data[0])
-        #     payload = data[1:]
-
-        #     self.events.on_state_patched(unpack_response_command(command, payload))
-
-        # await client.start_notify(
-        #     self._read_command_char.get(client), on_response_command
-        # )
-
-    #async def async_request_other_settings(self) -> None:
-    #    await self._async_write_state(bytes([Command.REQUEST_OTHER_SETTINGS]))
-    #
+        await client.start_notify(
+            self._uptime_char.get(client),
+            lambda _, payload: self.events.on_state_patched(unpack_uptime_state(payload))
+        )
 
     async def _async_write_data(self, char: CharacteristicReference, data: bytes) -> None:
         client = self._require_client(False)
@@ -368,6 +360,15 @@ def unpack_battery_state(data: bytes) -> CyberswitchDeviceState:
 
     return CyberswitchDeviceState(
         battery_level=battery_level
+    )
+
+def unpack_uptime_state(data: bytes) -> CyberswitchDeviceState:
+    (
+        uptime,
+    ) = struct.unpack("<Q", data)
+
+    return CyberswitchDeviceState(
+        uptime=uptime
     )
 
 def unpack_config(data: bytes) -> CyberswitchDeviceConfig:

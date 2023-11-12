@@ -25,6 +25,7 @@ from homeassistant.const import (
     STATE_ON,
     STATE_OFF,
     STATE_UNKNOWN,
+    UnitOfTime,
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import entity_platform, config_validation as cv
@@ -74,6 +75,7 @@ async def async_setup_entry(
         CyberswitchConnectionSensor(coordinator),
         CyberswitchSwitchStateSensor(coordinator),
         CyberswitchBatteryLevelSensor(coordinator),
+        CyberswitchUptimeSensor(coordinator),
     ])
 
 
@@ -198,10 +200,32 @@ class CyberswitchBatteryLevelSensor(CyberswitchSensor):
         self._attr_native_value = self._device.state.battery_level
         self.async_write_ha_state()
 
+
+class CyberswitchUptimeSensor(CyberswitchSensor):
+    """Battery level sensor of a CyberSW device."""
+
+    _attr_device_class = SensorDeviceClass.DURATION
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = UnitOfTime.MILLISECONDS
+
+    def __init__(self, coordinator):
+        """Pass coordinator to CoordinatorEntity."""
+        super().__init__(coordinator)
+        config: CyberswitchConfigurationData = coordinator.config
+        self._attr_name = "Uptime"
+        self._device : CyberswitchDevice = config.device
+        self._attr_unique_id = coordinator.config_entry.entry_id + "-uptime"
+        self._attr_device_info = DeviceInfo(
+            identifiers={ (DOMAIN, config.device.address) },
+#            name=name,
+#            model=VERSION,
+#            manufacturer=NAME,
+        )
+        self._attr_native_value = None
+
     @callback
     def _async_write_state_changed(self) -> None:
-        _LOGGER.info(f'_async_write_state_changed() {self._device.state.battery_level=}')
-        self._attr_native_value = self._device.state.battery_level
+        self._attr_native_value = self._device.state.uptime / 1000 if self._device.state.uptime else None
         self.async_write_ha_state()
 
     @property
