@@ -272,7 +272,7 @@ class CyberswitchCommandProcessor(ABC):
             before=lambda: self._abort_with_status(
                 CyberswitchCommandResultStatus.DEVICE_UNAVAILABLE
             ),
-        ),
+        )
         self._machine.add_transition(
             "unhandled_exception",
             not_complete,
