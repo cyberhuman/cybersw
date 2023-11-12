@@ -27,6 +27,7 @@ from .const import (
 )
 
 from .models import CyberswitchConfigurationData
+from .coordinator import CyberswitchCoordinator
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -74,20 +75,9 @@ class CyberswitchOptionsFlow(OptionsFlowWithConfigEntry):
         return self.async_show_progress_done(next_step_id="device_config")
 
     async def _async_read_task(self):
-        data: CyberswitchConfigurationData = self.hass.data[DOMAIN][self.config_entry.entry_id]
-        #address: str = self.config_entry.data[CONF_ADDRESS]
-
-#        if not (ble_device := async_ble_device_from_address(self.hass, address)):
-#            raise ConfigEntryNotReady(
-#                f"Could not find CyberSW with address {address}. Try power cycling the device"
-#            )
-#        if not (info := async_last_service_info(self.hass, address)):
-#            raise ConfigEntryNotReady(
-#                f"Could not find CyberSW service info for {address}. Try power cycling the device"
-#            )
+        coordinator: CyberswitchCoordinator = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        data: CyberswitchConfigurationData = coordinator.data
         try:
-#            advertisement = parse_cyberswitch_advertisement(info)
-#            device = CyberswitchDevice(ble_device, advertisement)
             self._config = await data.device.async_read_config()
         finally:
             self.hass.async_create_task(
@@ -193,20 +183,9 @@ class CyberswitchOptionsFlow(OptionsFlowWithConfigEntry):
         return self.async_show_progress_done(next_step_id="device_config_done")
 
     async def _async_write_config_task(self):
-        data: CyberswitchConfigurationData = self.hass.data[DOMAIN][self.config_entry.entry_id]
-        #address: str = self.config_entry.data[CONF_ADDRESS]
-
-#        if not (ble_device := async_ble_device_from_address(self.hass, address)):
-#            raise ConfigEntryNotReady(
-#                f"Could not find CyberSW with address {address}. Try power cycling the device"
-#            )
-#        if not (info := async_last_service_info(self.hass, address)):
-#            raise ConfigEntryNotReady(
-#                f"Could not find CyberSW service info for {address}. Try power cycling the device"
-#            )
+        coordinator: CyberswitchCoordinator = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        data: CyberswitchConfigurationData = coordinator.data
         try:
-#            advertisement = parse_cyberswitch_advertisement(info)
-#            device = CyberswitchDevice(ble_device, advertisement)
             await data.device.async_write_config(self._config)
         finally:
             self.hass.async_create_task(
@@ -234,20 +213,9 @@ class CyberswitchOptionsFlow(OptionsFlowWithConfigEntry):
         return self.async_show_progress_done(next_step_id="device_config_done")
 
     async def _async_store_config_task(self):
-        data: CyberswitchConfigurationData = self.hass.data[DOMAIN][self.config_entry.entry_id]
-        #address: str = self.config_entry.data[CONF_ADDRESS]
-
-#        if not (ble_device := async_ble_device_from_address(self.hass, address)):
-#            raise ConfigEntryNotReady(
-#                f"Could not find CyberSW with address {address}. Try power cycling the device"
-#            )
-#        if not (info := async_last_service_info(self.hass, address)):
-#            raise ConfigEntryNotReady(
-#                f"Could not find CyberSW service info for {address}. Try power cycling the device"
-#            )
+        coordinator: CyberswitchCoordinator = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        data: CyberswitchConfigurationData = coordinator.data
         try:
-#            advertisement = parse_cyberswitch_advertisement(info)
-#            device = CyberswitchDevice(ble_device, advertisement)
             await data.device.async_store_config()
         finally:
             self.hass.async_create_task(
@@ -275,20 +243,9 @@ class CyberswitchOptionsFlow(OptionsFlowWithConfigEntry):
         return self.async_show_progress_done(next_step_id="device_config_done")
 
     async def _async_restore_config_task(self):
-        data: CyberswitchConfigurationData = self.hass.data[DOMAIN][self.config_entry.entry_id]
-        #address: str = self.config_entry.data[CONF_ADDRESS]
-
-#        if not (ble_device := async_ble_device_from_address(self.hass, address)):
-#            raise ConfigEntryNotReady(
-#                f"Could not find CyberSW with address {address}. Try power cycling the device"
-#            )
-#        if not (info := async_last_service_info(self.hass, address)):
-#            raise ConfigEntryNotReady(
-#                f"Could not find CyberSW service info for {address}. Try power cycling the device"
-#            )
+        coordinator: CyberswitchCoordinator = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        data: CyberswitchConfigurationData = coordinator.data
         try:
-#            advertisement = parse_cyberswitch_advertisement(info)
-#            device = CyberswitchDevice(ble_device, advertisement)
             await data.device.async_restore_config()
         finally:
             self.hass.async_create_task(

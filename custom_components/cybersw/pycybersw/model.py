@@ -56,7 +56,7 @@ class CyberswitchAdvertisementData:
 @dataclass(repr=False)
 class CyberswitchDeviceState:
     on: bool | None = None
-#    volume: int | None = None
+    battery_level: int | None = None
 #
 #    light_on: bool | None = None
 #    light_brightness: int | None = None
@@ -76,6 +76,9 @@ class CyberswitchDeviceState:
 
         #attributes = [f"Noise {'On' if self.on else 'Off'} at {self.volume}% volume"]
         attributes = [f"Switch {'On' if self.on else 'Off'}"]
+
+        if self.battery_level is not None:
+            attributes += [f"battery {self.battery_level}%"]
 
 #        if self.night_mode_enabled is True:
 #            brightness = ""
@@ -109,7 +112,7 @@ class CyberswitchDeviceState:
 #
         parts = ", ".join(attributes)
 
-        return f"Cyberswitch({parts})"
+        return f"CyberswitchDeviceState({parts})"
 
 
 UnknownCyberswitchState = CyberswitchDeviceState()

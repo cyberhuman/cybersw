@@ -240,7 +240,10 @@ class CyberswitchCommandProcessor(ABC):
             State(CommandProcessorState.COMPLETE, on_enter=self._on_complete),
         ]
 
-        not_complete = [CommandProcessorState.IDLE, CommandProcessorState.EXECUTING]
+        not_complete = [
+            CommandProcessorState.IDLE,
+            CommandProcessorState.EXECUTING
+        ]
 
         self._machine = Machine(states=states, initial=CommandProcessorState.IDLE)
 

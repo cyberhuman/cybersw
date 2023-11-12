@@ -16,6 +16,7 @@ from .const import (
     SWITCH_STATE_CHARACTERISTIC,
     WRITE_CONFIG_CHARACTERISTIC,
     READ_CONFIG_CHARACTERISTIC,
+    BATTERY_CHARACTERISTIC,
 
     # FIRMWARE_REVISION_CHARACTERISTIC,
     # HARDWARE_REVISION_CHARACTERISTIC,
@@ -141,9 +142,7 @@ class CyberswitchDeviceApi:
         self._switch_state_char = CharacteristicReference(SWITCH_STATE_CHARACTERISTIC)
         self._write_config_char = CharacteristicReference(WRITE_CONFIG_CHARACTERISTIC)
         self._read_config_char = CharacteristicReference(READ_CONFIG_CHARACTERISTIC)
-        #self._read_state_char = CharacteristicReference(READ_STATE_CHARACTERISTIC)
-        #self._read_command_char = CharacteristicReference(READ_COMMAND_CHARACTERISTIC)
-        #self._write_state_char = CharacteristicReference(WRITE_STATE_CHARACTERISTIC)
+        self._battery_char = CharacteristicReference(BATTERY_CHARACTERISTIC)
         self._info_chars = [
         #    CharacteristicReference(MANUFACTURER_NAME_CHARACTERISTIC),
         #    CharacteristicReference(MODEL_NUMBER_CHARACTERISTIC),
@@ -279,7 +278,7 @@ class CyberswitchDeviceApi:
         data = await client.read_gatt_char(
             self._switch_state_char.get(client), use_cached=use_cached
         )
-        return unpack_state(data)
+        return unpack_switch_state(data)
 
     async def async_subscribe(self) -> None:
         client = self._require_client(False)
@@ -287,12 +286,13 @@ class CyberswitchDeviceApi:
         if not client.is_connected:
             return
 
-        def on_state_change(_: BleakClient, payload: bytes) -> None:
-            self.events.on_state_patched(unpack_state(payload))
-
         await client.start_notify(
             self._switch_state_char.get(client),
-            on_state_change,
+            lambda _, payload: self.events.on_state_patched(unpack_switch_state(payload))
+        )
+        await client.start_notify(
+            self._battery_char.get(client),
+            lambda _, payload: self.events.on_state_patched(unpack_battery_state(payload))
         )
 
         # def on_response_command(_: BleakClient, data: bytes) -> None:
@@ -420,29 +420,33 @@ def unpack_response_command(command: ResponseCommand, data: bytes) -> Cyberswitc
     return result
 
 
-def unpack_state(data: bytes) -> CyberswitchDeviceState:
+def unpack_switch_state(data: bytes) -> CyberswitchDeviceState:
     (
-#        volume,
         on,
 #        fan_speed,
 #        fan_on,
 #        light_mode,
 #        light_brightness,
 #        night_mode_brightness,
-#    ) = struct.unpack("<BBxBBxxxxxxxxxxxBBBx", data)
+#    ) = struct.unpack("<BxBBxxxxxxxxxxxBBBx", data)
     ) = struct.unpack("<B", data)
+#     night_mode_enabled: bool = light_mode == 0 and light_brightness == 0
+    return CyberswitchDeviceState(
+        on=bool(on),
+#        light_on=not night_mode_enabled and light_brightness > 0,
+#        night_mode_enabled=night_mode_enabled,
+    )
 
-    # night_mode_enabled: bool = light_mode == 0 and light_brightness == 0
+def unpack_battery_state(data: bytes) -> CyberswitchDeviceState:
+    (
+        battery_level,
+        _, # voltage,
+        _, # raw_reading,
+        _, # calibrated
+    ) = struct.unpack("<BHHB", data)
 
     return CyberswitchDeviceState(
-#        volume=volume,
-        on=bool(on),
-#        fan_on=bool(fan_on),
-#        fan_speed=fan_speed,
-#        light_on=not night_mode_enabled and light_brightness > 0,
-#        light_brightness=light_brightness,
-#        night_mode_enabled=night_mode_enabled,
-#        night_mode_brightness=night_mode_brightness,
+        battery_level=battery_level
     )
 
 def unpack_config(data: bytes) -> CyberswitchDeviceConfig:

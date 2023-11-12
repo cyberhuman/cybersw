@@ -165,7 +165,10 @@ class CyberswitchDevice:
         )
         self._machine.add_transition(
             "command_execution_cancelled",
-            [CyberswitchConnectionStatus.DISCONNECTED, CyberswitchConnectionStatus.CONNECTED],
+            [
+                CyberswitchConnectionStatus.DISCONNECTED,
+                CyberswitchConnectionStatus.CONNECTED
+            ],
             None,
             before=lambda _: self._cancel_current_command(),
         )

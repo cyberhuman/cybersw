@@ -6,9 +6,6 @@ from collections.abc import Callable
 from typing import Any
 import logging
 
-from .pycybersw.advertisement import (
-    get_device_display_name
-)
 from .pycybersw.device import CyberswitchDevice
 from .pycybersw.model import UnknownCyberswitchState
 from .pycybersw.commands import (
@@ -42,6 +39,9 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 
+from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
+
 from .const import (
     #ATTR_DURATION,
     #DEFAULT_TRANSITION_DURATION,
@@ -50,6 +50,7 @@ from .const import (
     #SERVICE_TRANSITION_ON,
 )
 from .models import CyberswitchConfigurationData
+from .coordinator import CyberswitchCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -62,7 +63,9 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 )
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up CyberSW device from a config entry."""
 
@@ -89,39 +92,70 @@ async def async_setup_entry(
 #        "async_transition_off",
 #    )
 
-    data: CyberswitchConfigurationData = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([CyberswitchSwitch(data)])
+    coordinator: CyberswitchCoordinator = hass.data[DOMAIN][entry.entry_id]
+
+    # Fetch initial data so we have data when entities subscribe
+    #
+    # If the refresh fails, async_config_entry_first_refresh will
+    # raise ConfigEntryNotReady and setup will try again later
+    #
+    # If you do not want to retry setup on failure, use
+    # coordinator.async_refresh() instead
+    #
+    await coordinator.async_config_entry_first_refresh()
+
+    async_add_entities([
+        CyberswitchSwitch(coordinator)
+    ])
 
 
-class CyberswitchSwitch(SwitchEntity, RestoreEntity):
-    """Switch representation of a CyberSW device."""
+class CyberswitchSwitch(CoordinatorEntity, SwitchEntity, RestoreEntity):
+    """Switch representation of a CyberSW device.
+
+    The CoordinatorEntity class provides:
+      should_poll
+      async_update
+      async_added_to_hass
+      available
+    """
 
     _attr_has_entity_name = True
     _attr_name = None
     #_attr_supported_features = FanEntityFeature.SET_SPEED
-    _attr_should_poll = False
+    #_attr_should_poll = False
     _is_on: bool | None = None
     #_percentage: int | None = None
 
-    def __init__(self, data: CyberswitchConfigurationData) -> None:
-        """Initialize a CyberSW switch entity."""
-        name = get_device_display_name(data.device.name, data.device.address)
-        self._device : CyberswitchDevice = data.device
-        self._attr_unique_id = data.device.address
+    def __init__(self, coordinator):
+        """Pass coordinator to CoordinatorEntity."""
+        super().__init__(coordinator)
+        config: CyberswitchConfigurationData = coordinator.config
+        name = config.display_name
+        self._device : CyberswitchDevice = config.device
+        self._attr_unique_id = coordinator.config_entry.entry_id
         self._attr_device_info = DeviceInfo(
-            identifiers={ (DOMAIN, data.device.address) },
+            identifiers={ (DOMAIN, config.device.address) },
             name=name,
+#            model=VERSION,
+#            manufacturer=NAME,
         )
         self._attr_device_class = SwitchDeviceClass.SWITCH
-        #self._attr_name = name
+#        #self._attr_name = name
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self._is_on = self._device.state.on
+        _LOGGER.info(f'handle_coordinator_update() {self._device.state=}')
+        self.async_write_ha_state()
 
     @callback
     def _async_write_state_changed(self) -> None:
+        _LOGGER.info(f'_async_write_state_changed() {self.assumed_state=} {self._device.state=} {self._device.connection_status=}')
         # cache state for restore entity
         if not self.assumed_state:
             self._is_on = self._device.state.on
             #self._percentage = self._device.state.volume
-
         self.async_write_ha_state()
 
     async def async_added_to_hass(self) -> None:
@@ -206,11 +240,9 @@ class CyberswitchSwitch(SwitchEntity, RestoreEntity):
 
     async def _async_execute_command(self, command: CyberswitchCommandData) -> None:
         result = await self._device.async_execute_command(command)
-        #try:
-        #    await self._device.async_disconnect()
-        #finally:
         if result.status == CyberswitchCommandResultStatus.SUCCESSFUL:
-            self._async_write_state_changed()
+            #self._async_write_state_changed()
+            pass
         elif result.status != CyberswitchCommandResultStatus.CANCELLED:
             raise HomeAssistantError(
                 f"Command {command} failed with status {result.status.name} after"

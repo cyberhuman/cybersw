@@ -13,3 +13,4 @@ class CyberswitchConfigurationData:
     ble_device: BLEDevice
     device: CyberswitchDevice
     title: str
+    display_name: str

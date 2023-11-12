@@ -3,7 +3,10 @@ from __future__ import annotations
 
 import logging
 
-from .pycybersw.advertisement import parse_cyberswitch_advertisement
+from .pycybersw.advertisement import (
+    get_device_display_name,
+    parse_cyberswitch_advertisement,
+)
 
 from .pycybersw.device import CyberswitchDevice
 
@@ -27,6 +30,7 @@ from .const import (
     DEFAULT_IDLE_DISCONNECT_DELAY,
 )
 from .models import CyberswitchConfigurationData
+from .coordinator import CyberswitchCoordinator
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -52,12 +56,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         advertisement,
         idle_disconnect_delay_ms=entry.options.get(OPTION_IDLE_DISCONNECT_DELAY, DEFAULT_IDLE_DISCONNECT_DELAY)
     )
-
-    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = CyberswitchConfigurationData(
+    config = CyberswitchConfigurationData(
         ble_device,
         device,
-        entry.title
+        entry.title,
+        get_device_display_name(device.name, device.address)
     )
+    coordinator = CyberswitchCoordinator(hass, config)
+
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
@@ -66,18 +73,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Handle options update."""
-    data: CyberswitchConfigurationData = hass.data[DOMAIN][entry.entry_id]
-    if entry.title != data.title or entry.options.get(OPTION_IDLE_DISCONNECT_DELAY, DEFAULT_IDLE_DISCONNECT_DELAY) != data.device.idle_disconnect_delay_ms:
+    coordinator: CyberswitchCoordinator = hass.data[DOMAIN][entry.entry_id]
+    config: CyberswitchConfigurationData = coordinator.config
+    if (
+        entry.title != config.title or
+        entry.options.get(OPTION_IDLE_DISCONNECT_DELAY, DEFAULT_IDLE_DISCONNECT_DELAY) !=
+            config.device.idle_disconnect_delay_ms
+    ):
         await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
-        data: CyberswitchConfigurationData = hass.data[DOMAIN][entry.entry_id]
+        coordinator: CyberswitchCoordinator = hass.data[DOMAIN][entry.entry_id]
+        config: CyberswitchConfigurationData = coordinator.config
 
         # also called by switch entities, but do it here too for good measure
-        await data.device.async_disconnect()
+        await config.device.async_disconnect()
 
         hass.data[DOMAIN].pop(entry.entry_id)
 
