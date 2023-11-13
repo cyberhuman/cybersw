@@ -77,11 +77,34 @@ async def async_setup_entry(
     ])
 
 
-class CyberswitchConnectionSensor(CoordinatorEntity, SensorEntity):
-    """Connection sensor of a CyberSW device."""
-
+class CyberswitchSensor(CoordinatorEntity, SensorEntity):
+    """Base class for CyberSW sensors."""
     _attr_has_entity_name = True
     #_attr_should_poll = False
+
+    async def async_added_to_hass(self) -> None:
+        """Restore state and subscribe to device events."""
+        await super().async_added_to_hass()
+        self.async_on_remove(self._async_subscribe_to_device_change())
+
+    @callback
+    def _async_subscribe_to_device_change(self) -> Callable[[], None]:
+        """Subscribe to device state changes."""
+        return self._device.subscribe_to_state_change(self._async_write_state_changed)
+
+    @callback
+    def _async_write_state_changed(self) -> None:
+        pass
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self._async_write_state_changed()
+
+
+class CyberswitchConnectionSensor(CyberswitchSensor):
+    """Connection sensor of a CyberSW device."""
+
     _attr_device_class = SensorDeviceClass.ENUM
 
     def __init__(self, coordinator):
@@ -100,21 +123,7 @@ class CyberswitchConnectionSensor(CoordinatorEntity, SensorEntity):
         self._attr_native_value = "disconnected"
 
     @callback
-    def _handle_coordinator_update(self) -> None:
-        """Handle updated data from the coordinator."""
-        _LOGGER.info(f'_handle_coordinator_update() {self._device.connection_status=}')
-        match self._device.connection_status:
-            case CyberswitchConnectionStatus.DISCONNECTED:
-                self._attr_native_value = "disconnected"
-            case CyberswitchConnectionStatus.CONNECTING:
-                self._attr_native_value = "connecting"
-            case CyberswitchConnectionStatus.CONNECTED:
-                self._attr_native_value = "connected"
-        self.async_write_ha_state()
-
-    @callback
     def _async_write_state_changed(self) -> None:
-        _LOGGER.info(f'_async_write_state_changed() {self._device.connection_status=}')
         match self._device.connection_status:
             case CyberswitchConnectionStatus.DISCONNECTED:
                 self._attr_native_value = "disconnected"
@@ -123,16 +132,6 @@ class CyberswitchConnectionSensor(CoordinatorEntity, SensorEntity):
             case CyberswitchConnectionStatus.CONNECTED:
                 self._attr_native_value = "connected"
         self.async_write_ha_state()
-
-    async def async_added_to_hass(self) -> None:
-        """Restore state and subscribe to device events."""
-        await super().async_added_to_hass()
-        self.async_on_remove(self._async_subscribe_to_device_change())
-
-    @callback
-    def _async_subscribe_to_device_change(self) -> Callable[[], None]:
-        """Subscribe to device state changes."""
-        return self._device.subscribe_to_state_change(self._async_write_state_changed)
 
     @property
     def icon(self):
@@ -140,11 +139,9 @@ class CyberswitchConnectionSensor(CoordinatorEntity, SensorEntity):
         return "mdi:connection"
 
 
-class CyberswitchSwitchStateSensor(CoordinatorEntity, SensorEntity):
+class CyberswitchSwitchStateSensor(CyberswitchSensor):
     """Switch state sensor of a CyberSW device."""
 
-    _attr_has_entity_name = True
-    #_attr_should_poll = False
     _attr_device_class = SensorDeviceClass.ENUM
 
     def __init__(self, coordinator):
@@ -163,21 +160,7 @@ class CyberswitchSwitchStateSensor(CoordinatorEntity, SensorEntity):
         self._attr_native_value = STATE_UNKNOWN
 
     @callback
-    def _handle_coordinator_update(self) -> None:
-        """Handle updated data from the coordinator."""
-        _LOGGER.info(f'_handle_coordinator_update() {self._device.state.on=}')
-        match self._device.state.on:
-            case None:
-                self._attr_native_value = STATE_UNKNOWN
-            case True:
-                self._attr_native_value = STATE_ON
-            case False:
-                self._attr_native_value = STATE_OFF
-        self.async_write_ha_state()
-
-    @callback
     def _async_write_state_changed(self) -> None:
-        _LOGGER.info(f'_async_write_state_changed() {self._device.state.on=}')
         match self._device.state.on:
             case None:
                 self._attr_native_value = STATE_UNKNOWN
@@ -187,22 +170,10 @@ class CyberswitchSwitchStateSensor(CoordinatorEntity, SensorEntity):
                 self._attr_native_value = STATE_OFF
         self.async_write_ha_state()
 
-    async def async_added_to_hass(self) -> None:
-        """Restore state and subscribe to device events."""
-        await super().async_added_to_hass()
-        self.async_on_remove(self._async_subscribe_to_device_change())
 
-    @callback
-    def _async_subscribe_to_device_change(self) -> Callable[[], None]:
-        """Subscribe to device state changes."""
-        return self._device.subscribe_to_state_change(self._async_write_state_changed)
-
-
-class CyberswitchBatteryLevelSensor(CoordinatorEntity, SensorEntity):
+class CyberswitchBatteryLevelSensor(CyberswitchSensor):
     """Battery level sensor of a CyberSW device."""
 
-    _attr_has_entity_name = True
-    #_attr_should_poll = False
     _attr_device_class = SensorDeviceClass.BATTERY
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = PERCENTAGE
@@ -223,9 +194,7 @@ class CyberswitchBatteryLevelSensor(CoordinatorEntity, SensorEntity):
         self._attr_native_value = None
 
     @callback
-    def _handle_coordinator_update(self) -> None:
-        """Handle updated data from the coordinator."""
-        _LOGGER.info(f'_handle_coordinator_update() {self._device.state.battery_level=}')
+    def _async_write_state_changed(self) -> None:
         self._attr_native_value = self._device.state.battery_level
         self.async_write_ha_state()
 
@@ -235,17 +204,7 @@ class CyberswitchBatteryLevelSensor(CoordinatorEntity, SensorEntity):
         self._attr_native_value = self._device.state.battery_level
         self.async_write_ha_state()
 
-    async def async_added_to_hass(self) -> None:
-        """Restore state and subscribe to device events."""
-        await super().async_added_to_hass()
-        self.async_on_remove(self._async_subscribe_to_device_change())
-
-    @callback
-    def _async_subscribe_to_device_change(self) -> Callable[[], None]:
-        """Subscribe to device state changes."""
-        return self._device.subscribe_to_state_change(self._async_write_state_changed)
-#
-#    @property
-#    def icon(self):
-#        """Icon to use in the frontend."""
-#        return "mdi:battery-30"
+    @property
+    def icon(self):
+        """Icon to use in the frontend."""
+        return "mdi:clock-digital"
