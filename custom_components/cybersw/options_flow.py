@@ -76,9 +76,9 @@ class CyberswitchOptionsFlow(OptionsFlowWithConfigEntry):
 
     async def _async_read_task(self):
         coordinator: CyberswitchCoordinator = self.hass.data[DOMAIN][self.config_entry.entry_id]
-        data: CyberswitchConfigurationData = coordinator.data
+        config: CyberswitchConfigurationData = coordinator.config
         try:
-            self._config = await data.device.async_read_config()
+            self._config = await config.device.async_read_config()
         finally:
             self.hass.async_create_task(
                 self.hass.config_entries.options.async_configure(flow_id=self.flow_id)
@@ -184,9 +184,9 @@ class CyberswitchOptionsFlow(OptionsFlowWithConfigEntry):
 
     async def _async_write_config_task(self):
         coordinator: CyberswitchCoordinator = self.hass.data[DOMAIN][self.config_entry.entry_id]
-        data: CyberswitchConfigurationData = coordinator.data
+        config: CyberswitchConfigurationData = coordinator.config
         try:
-            await data.device.async_write_config(self._config)
+            await config.device.async_write_config(self._config)
         finally:
             self.hass.async_create_task(
                 self.hass.config_entries.options.async_configure(flow_id=self.flow_id)
@@ -214,9 +214,9 @@ class CyberswitchOptionsFlow(OptionsFlowWithConfigEntry):
 
     async def _async_store_config_task(self):
         coordinator: CyberswitchCoordinator = self.hass.data[DOMAIN][self.config_entry.entry_id]
-        data: CyberswitchConfigurationData = coordinator.data
+        config: CyberswitchConfigurationData = coordinator.config
         try:
-            await data.device.async_store_config()
+            await config.device.async_store_config()
         finally:
             self.hass.async_create_task(
                 self.hass.config_entries.options.async_configure(flow_id=self.flow_id)
@@ -244,9 +244,9 @@ class CyberswitchOptionsFlow(OptionsFlowWithConfigEntry):
 
     async def _async_restore_config_task(self):
         coordinator: CyberswitchCoordinator = self.hass.data[DOMAIN][self.config_entry.entry_id]
-        data: CyberswitchConfigurationData = coordinator.data
+        config: CyberswitchConfigurationData = coordinator.config
         try:
-            await data.device.async_restore_config()
+            await config.device.async_restore_config()
         finally:
             self.hass.async_create_task(
                 self.hass.config_entries.options.async_configure(flow_id=self.flow_id)
