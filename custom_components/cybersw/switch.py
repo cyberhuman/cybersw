@@ -243,7 +243,7 @@ class CyberswitchSwitch(CoordinatorEntity, SwitchEntity, RestoreEntity):
                 f" {result.duration}"
             )
 
-class CyberswitchConnectionSwitch(CoordinatorEntity, SwitchEntity):
+class CyberswitchConnectionSwitch(CoordinatorEntity, SwitchEntity, RestoreEntity):
     """Switch representation of the connection to a CyberSW device."""
 
     #_attr_has_entity_name = True
