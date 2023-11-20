@@ -21,7 +21,6 @@ from .pycybersw.commands import (
 
 import voluptuous as vol
 
-#from homeassistant.components.fan import ATTR_PERCENTAGE, FanEntity, FanEntityFeature
 from homeassistant.components.switch import (
     PLATFORM_SCHEMA,
     SwitchEntity,
@@ -123,7 +122,6 @@ class CyberswitchSwitch(CoordinatorEntity, SwitchEntity, RestoreEntity):
 
     _attr_has_entity_name = True
     _attr_name = None
-    #_attr_supported_features = FanEntityFeature.SET_SPEED
     #_attr_should_poll = False
     _is_on: bool | None = None
     #_percentage: int | None = None
@@ -142,7 +140,6 @@ class CyberswitchSwitch(CoordinatorEntity, SwitchEntity, RestoreEntity):
 #            manufacturer=NAME,
         )
         self._attr_device_class = SwitchDeviceClass.SWITCH
-#        #self._attr_name = name
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -209,16 +206,11 @@ class CyberswitchSwitch(CoordinatorEntity, SwitchEntity, RestoreEntity):
 #                f"/_/{self.platform.platform_name}/icon.png"
 #        )
 #
-    async def async_turn_on(
-        self,
-        #percentage: int | None = None,
-        #preset_mode: str | None = None,
-        **kwargs: Any,
-    ) -> None:
+    async def async_turn_on(self) -> None:
         """Turn on the device."""
         await self._async_execute_command(turn_on())
 
-    async def async_turn_off(self, **kwargs: Any) -> None:
+    async def async_turn_off(self) -> None:
         """Turn off the device."""
         await self._async_execute_command(turn_off())
 

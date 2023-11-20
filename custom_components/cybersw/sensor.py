@@ -108,12 +108,18 @@ class CyberswitchConnectionSensor(CyberswitchSensor):
     """Connection sensor of a CyberSW device."""
 
     _attr_device_class = SensorDeviceClass.ENUM
+    _attr_icon = "mdi:connection"
+    _attr_name = "Connection"
+    _attr_options = [
+        "disconnected",
+        "connecting",
+        "connected",
+    ]
 
     def __init__(self, coordinator):
         """Pass coordinator to CoordinatorEntity."""
         super().__init__(coordinator)
         config: CyberswitchConfigurationData = coordinator.config
-        self._attr_name = "Connection"
         self._device : CyberswitchDevice = config.device
         self._attr_unique_id = coordinator.config_entry.entry_id + "-conn"
         self._attr_device_info = DeviceInfo(
@@ -135,22 +141,17 @@ class CyberswitchConnectionSensor(CyberswitchSensor):
                 self._attr_native_value = "connected"
         self.async_write_ha_state()
 
-    @property
-    def icon(self):
-        """Icon to use in the frontend."""
-        return "mdi:connection"
-
 
 class CyberswitchSwitchStateSensor(CyberswitchSensor):
     """Switch state sensor of a CyberSW device."""
 
     _attr_device_class = SensorDeviceClass.ENUM
+    _attr_name = "Switch state"
 
     def __init__(self, coordinator):
         """Pass coordinator to CoordinatorEntity."""
         super().__init__(coordinator)
         config: CyberswitchConfigurationData = coordinator.config
-        self._attr_name = "Switch state"
         self._device : CyberswitchDevice = config.device
         self._attr_unique_id = coordinator.config_entry.entry_id + "-state"
         self._attr_device_info = DeviceInfo(
@@ -184,7 +185,6 @@ class CyberswitchBatteryLevelSensor(CyberswitchSensor):
         """Pass coordinator to CoordinatorEntity."""
         super().__init__(coordinator)
         config: CyberswitchConfigurationData = coordinator.config
-        #self._attr_name = config.display_name
         self._device : CyberswitchDevice = config.device
         self._attr_unique_id = coordinator.config_entry.entry_id + "-battery"
         self._attr_device_info = DeviceInfo(
@@ -207,12 +207,14 @@ class CyberswitchUptimeSensor(CyberswitchSensor):
     _attr_device_class = SensorDeviceClass.DURATION
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = UnitOfTime.MILLISECONDS
+    _attr_entity_registry_enabled_default = False
+    _attr_icon = "mdi:clock-digital"
+    _attr_name = "Uptime"
 
     def __init__(self, coordinator):
         """Pass coordinator to CoordinatorEntity."""
         super().__init__(coordinator)
         config: CyberswitchConfigurationData = coordinator.config
-        self._attr_name = "Uptime"
         self._device : CyberswitchDevice = config.device
         self._attr_unique_id = coordinator.config_entry.entry_id + "-uptime"
         self._attr_device_info = DeviceInfo(
@@ -227,8 +229,3 @@ class CyberswitchUptimeSensor(CyberswitchSensor):
     def _async_write_state_changed(self) -> None:
         self._attr_native_value = self._device.state.uptime / 1000 if self._device.state.uptime else None
         self.async_write_ha_state()
-
-    @property
-    def icon(self):
-        """Icon to use in the frontend."""
-        return "mdi:clock-digital"
