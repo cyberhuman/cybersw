@@ -359,7 +359,7 @@ class CyberswitchDevice:
 
         try:
             try:
-                await self._async_wait_for_connection_complete()
+                await self.async_wait_for_connection_complete()
             except CancelledError:
                 raise
 
@@ -379,7 +379,7 @@ class CyberswitchDevice:
                 reason=DisconnectionReason.UNEXPECTED_ERROR
             )
 
-    async def _async_wait_for_connection_complete(self) -> None:
+    async def async_wait_for_connection_complete(self) -> None:
         if self.connection_status == CyberswitchConnectionStatus.DISCONNECTED:
             async with self._connect_lock:
                 if self._connection_task is None or self._connection_task.done():

@@ -6,7 +6,10 @@ from collections.abc import Callable
 from typing import Any
 import logging
 
-from .pycybersw.device import CyberswitchDevice
+from .pycybersw.device import (
+    CyberswitchDevice,
+    DisconnectionReason,
+)
 from .pycybersw.model import UnknownCyberswitchState
 from .pycybersw.commands import (
     CyberswitchCommandData,
@@ -103,7 +106,8 @@ async def async_setup_entry(
     await coordinator.async_config_entry_first_refresh()
 
     async_add_entities([
-        CyberswitchSwitch(coordinator)
+        CyberswitchSwitch(coordinator),
+        CyberswitchConnectionSwitch(coordinator),
     ])
 
 
@@ -246,3 +250,62 @@ class CyberswitchSwitch(CoordinatorEntity, SwitchEntity, RestoreEntity):
                 f"Command {command} failed with status {result.status.name} after"
                 f" {result.duration}"
             )
+
+class CyberswitchConnectionSwitch(CoordinatorEntity, SwitchEntity):
+    """Switch representation of the connection to a CyberSW device."""
+
+    #_attr_has_entity_name = True
+    _attr_name = "Connection"
+    #_attr_should_poll = False
+    _attr_entity_registry_enabled_default = False
+    _is_on: bool | None = None
+    _attr_icon = "mdi:connection"
+
+    def __init__(self, coordinator):
+        """Pass coordinator to CoordinatorEntity."""
+        super().__init__(coordinator)
+        config: CyberswitchConfigurationData = coordinator.config
+        self._device : CyberswitchDevice = config.device
+        self._attr_unique_id = coordinator.config_entry.entry_id + "-connection"
+        self._attr_device_info = DeviceInfo(
+            identifiers={ (DOMAIN, config.device.address) },
+#            name=name,
+#            model=VERSION,
+#            manufacturer=NAME,
+        )
+        self._attr_device_class = SwitchDeviceClass.SWITCH
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        _LOGGER.info(f'handle_coordinator_update() {self._device.state=}')
+        self._is_on = self._device.is_connected
+        self.async_write_ha_state()
+
+    @callback
+    def _async_write_state_changed(self) -> None:
+        _LOGGER.info(f'_async_write_state_changed() {self.assumed_state=} {self._device.state=} {self._device.connection_status=}')
+        self._is_on = self._device.is_connected
+        self.async_write_ha_state()
+
+    async def async_added_to_hass(self) -> None:
+        """Restore state and subscribe to device events."""
+        await super().async_added_to_hass()
+        self.async_on_remove(self._async_subscribe_to_device_change())
+
+    @callback
+    def _async_subscribe_to_device_change(self) -> Callable[[], None]:
+        return self._device.subscribe_to_state_change(self._async_write_state_changed)
+
+    @property
+    def is_on(self) -> bool | None:
+        """Power state of the device."""
+        return self._device.is_connected
+
+    async def async_turn_on(self) -> None:
+        """Turn on the device."""
+        await self._device.async_wait_for_connection_complete()
+
+    async def async_turn_off(self) -> None:
+        """Turn off the device."""
+        await self._device.async_disconnect(reason=DisconnectionReason.USER)
