@@ -295,13 +295,13 @@ class CyberswitchConnectionSwitch(CoordinatorEntity, SwitchEntity, RestoreEntity
 
     @property
     def is_on(self) -> bool | None:
-        """Power state of the device."""
+        """Connection state of the device."""
         return self._device.is_connected
 
     async def async_turn_on(self) -> None:
-        """Turn on the device."""
+        """Connect to the device."""
         await self._device.async_wait_for_connection_complete()
 
     async def async_turn_off(self) -> None:
-        """Turn off the device."""
+        """Disconnect from the device."""
         await self._device.async_disconnect(reason=DisconnectionReason.USER)
