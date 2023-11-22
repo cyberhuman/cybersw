@@ -399,7 +399,10 @@ class CyberswitchDevice:
         self._machine.connection_start()
 
         try:
-            api = await self._async_create_api()
+            try:
+                api = await self._async_create_api()
+            except MissingCharacteristicError:
+                api = await self._async_create_api(use_services_cache=False)
             api.events.on_disconnect += lambda: self._machine.device_disconnected(
                 reason=DisconnectionReason.DEVICE
             )
@@ -429,7 +432,7 @@ class CyberswitchDevice:
         if self.connection_status == CyberswitchConnectionStatus.CONNECTING:
             self._machine.connection_ready()
 
-    async def _async_create_api(self) -> CyberswitchDeviceApi:
+    async def _async_create_api(self, use_services_cache=True) -> CyberswitchDeviceApi:
         api = CyberswitchDeviceApi(format_log_message=self._)
 
         def _on_disconnect(_: BleakClientWithServiceCache) -> None:
@@ -444,7 +447,7 @@ class CyberswitchDevice:
             self.display_name,
             disconnected_callback=_on_disconnect,
             max_attempts=1,
-            use_services_cache=True,
+            use_services_cache=use_services_cache,
             ble_device_callback=lambda: self._device,
         )
 
