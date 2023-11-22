@@ -18,6 +18,7 @@ from .const import (
     READ_CONFIG_CHARACTERISTIC,
     BATTERY_CHARACTERISTIC,
     UPTIME_CHARACTERISTIC,
+    CONN_INT_CHARACTERISTIC,
 
     # FIRMWARE_REVISION_CHARACTERISTIC,
     # HARDWARE_REVISION_CHARACTERISTIC,
@@ -107,6 +108,7 @@ class CyberswitchDeviceApi:
         self._read_config_char = CharacteristicReference(READ_CONFIG_CHARACTERISTIC)
         self._battery_char = CharacteristicReference(BATTERY_CHARACTERISTIC)
         self._uptime_char = CharacteristicReference(UPTIME_CHARACTERISTIC)
+        self._connection_interval_char = CharacteristicReference(CONN_INT_CHARACTERISTIC)
         self._info_chars = [
         #    CharacteristicReference(MANUFACTURER_NAME_CHARACTERISTIC),
         #    CharacteristicReference(MODEL_NUMBER_CHARACTERISTIC),
@@ -177,6 +179,12 @@ class CyberswitchDeviceApi:
             # Command.SWITCH,
             1 if on else 0
         ]))
+
+    async def async_set_connection_interval(self, connection_interval_ms: int) -> None:
+        await self._async_write_data(self._connection_interval_char, struct.pack(
+            "<H",
+            connection_interval_ms,
+        ))
 
 #    async def async_set_light_brightness(self, brightness: int) -> None:
 #        if brightness < 0 or brightness > 100:
@@ -304,11 +312,9 @@ class CyberswitchDeviceApi:
         )
         return unpack_config(data)
 
-
     async def async_write_config(self, config: CyberswitchDeviceConfig) -> None:
         data = bytes([ 0x7F ]) + pack_config(config)
         await self._async_write_config_command(data)
-
 
     async def async_store_config(self) -> None:
         await self._async_write_config_command(bytes([ 0x80 ]))

@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from collections.abc import Callable
 #from datetime import timedelta
-from typing import Any
 import logging
 
 from .pycybersw.device import (
@@ -17,6 +16,7 @@ from .pycybersw.commands import (
 #    set_volume,
     turn_off,
     turn_on,
+    set_connection_interval,
 )
 
 import voluptuous as vol
@@ -43,11 +43,9 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
-    #ATTR_DURATION,
-    #DEFAULT_TRANSITION_DURATION,
+    ATTR_INTERVAL,
     DOMAIN,
-    #SERVICE_TRANSITION_OFF,
-    #SERVICE_TRANSITION_ON,
+    SERVICE_SET_CONNECTION_INTERVAL,
 )
 from .models import CyberswitchConfigurationData
 from .coordinator import CyberswitchCoordinator
@@ -69,7 +67,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up CyberSW device from a config entry."""
 
-    entity_platform.async_get_current_platform()
+    platform = entity_platform.async_get_current_platform()
 #    platform.xsync_register_entity_service(
 #        SERVICE_TRANSITION_ON,
 #        {
@@ -108,6 +106,14 @@ async def async_setup_entry(
         CyberswitchSwitch(coordinator),
         CyberswitchConnectionSwitch(coordinator),
     ])
+
+    platform.async_register_entity_service(
+        SERVICE_SET_CONNECTION_INTERVAL,
+        {
+            vol.Required(ATTR_INTERVAL, "interval"): vol.Coerce(int),
+        },
+        "async_set_connection_interval",
+    )
 
 
 class CyberswitchSwitch(CoordinatorEntity, SwitchEntity, RestoreEntity):
@@ -214,12 +220,10 @@ class CyberswitchSwitch(CoordinatorEntity, SwitchEntity, RestoreEntity):
         """Turn off the device."""
         await self._async_execute_command(turn_off())
 
-#    async def async_set_percentage(self, percentage: int) -> None:
-#        """Set the volume of the device. A value of 0 will turn off the device."""
-#        await self._async_execute_command(
-#            set_volume(percentage) if percentage > 0 else turn_off()
-#        )
-#
+    async def async_set_connection_interval(self, interval: int) -> None:
+        """Set BLE connection interval."""
+        await self._async_execute_command(set_connection_interval(interval))
+
 #    async def async_transition_on(self, duration: int, **kwargs: Any) -> None:
 #        """Transition on the device."""
 #        await self._async_execute_command(

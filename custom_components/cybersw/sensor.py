@@ -81,6 +81,7 @@ async def async_setup_entry(
 
 class CyberswitchSensor(CoordinatorEntity, SensorEntity):
     """Base class for CyberSW sensors."""
+
     _attr_has_entity_name = True
     #_attr_should_poll = False
 

@@ -36,20 +36,10 @@ class CyberswitchDeviceAction(IntEnum):
 class CyberswitchCommandData:
     on: bool | None = None
     config: CyberswitchDeviceConfig | None = None
+    connection_interval_ms: int | None = None
 
-#    light_on: bool | None = None
-#    light_brightness: int | None = None
-#    night_mode_enabled: bool | None = None
-#    night_mode_brightness: int | None = None
-#
 #    # duration to transition target values
     duration: timedelta | None = None
-#
-#    # Breez only properties
-#    fan_on: bool | None = None
-#    fan_speed: int | None = None
-#    temp_target: int | None = None
-#    auto_temp_enabled: bool | None = None
 
     action: CyberswitchDeviceAction | None = None
 
@@ -58,6 +48,9 @@ class CyberswitchCommandData:
 
         if self.on is not None:
             operations += ["TurnOn"] if self.on else ["TurnOff"]
+
+        if self.connection_interval_ms is not None:
+            operations += [f"SetConnectionInterval({self.connection_interval_ms})"]
 
 #        if self.fan_on is not None:
 #            operations += ["TurnOnFan"] if self.fan_on else ["TurnOffFan"]
@@ -147,6 +140,10 @@ def store_device_config() -> CyberswitchCommandData:
 
 def restore_device_config() -> CyberswitchCommandData:
     return CyberswitchCommandData(action=CyberswitchDeviceAction.RESTORE_DEVICE_CONFIG)
+
+
+def set_connection_interval(connection_interval_ms: int) -> CyberswitchCommandData:
+    return CyberswitchCommandData(connection_interval_ms=connection_interval_ms)
 
 
 #def turn_light_on(brightness: int | None = None) -> CyberswitchCommandData:
@@ -463,31 +460,10 @@ class DeviceActionCommand(CyberswitchCommandProcessor):
 
 class WriteDeviceStateCommand(CyberswitchCommandProcessor):
     async def _async_execute(self, api: CyberswitchDeviceApi) -> None:
-#        if self.command.volume is not None:
-#            await api.async_set_volume(self.command.volume)
         if self.command.on is not None:
             await api.async_set_power(self.command.on)
-#        if self.command.fan_speed is not None:
-#            await api.async_set_fan_speed(self.command.fan_speed)
-#        if self.command.fan_on is not None:
-#            await api.async_set_fan_power(self.command.fan_on)
-#        if self.command.auto_temp_enabled is not None:
-#            await api.async_set_auto_temp_enabled(self.command.auto_temp_enabled)
-#        if self.command.temp_target is not None:
-#            await api.async_set_auto_temp_enabled(True)
-#            await api.async_set_auto_temp_threshold(self.command.temp_target)
-#
-#        if self.command.night_mode_enabled is not None:
-#            await api.async_set_night_mode_enabled(
-#                self.command.night_mode_enabled,
-#                self.command.night_mode_brightness or 100,
-#            )
-#        elif self.command.light_on is True:
-#            await api.async_set_light_brightness(self.command.light_brightness or 100)
-#        elif self.command.light_on is False:
-#            await api.async_set_light_brightness(0)
-#        elif self.command.light_brightness is not None:
-#            await api.async_set_light_brightness(self.command.light_brightness)
+        if self.command.connection_interval_ms is not None:
+            await api.async_set_connection_interval(self.command.connection_interval_ms)
 
 
 class DeviceFeatureControls(ABC):

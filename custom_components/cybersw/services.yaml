@@ -1,0 +1,16 @@
+set_connection_interval:
+  description: Set BLE connection interval of the target device.
+  target:
+    entity:
+      integration: cybersw
+      domain: switch
+  fields:
+    interval:
+      required: true
+      description: New BLE connection interval in millisconds.
+      example: 2000
+      selector:
+        number:
+          min: 500
+          max: 4000
+          unit_of_measurement: "milliseconds"

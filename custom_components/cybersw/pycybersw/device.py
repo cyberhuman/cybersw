@@ -28,6 +28,7 @@ from .commands import (
     CyberswitchCommandResult,
     create_command_processor,
     read_device_config,
+    set_connection_interval,
     write_device_config,
     store_device_config,
     restore_device_config,
@@ -290,6 +291,10 @@ class CyberswitchDevice:
 
     async def async_restore_config(self) -> None:
         result = await self.async_execute_command(restore_device_config())
+        return result.response
+
+    async def async_set_connection_interval(self, connection_interval_ms: int) -> None:
+        result = await self.async_execute_command(set_connection_interval(connection_interval_ms))
         return result.response
 
     def _async_cancel_idle_disconnect(self):
