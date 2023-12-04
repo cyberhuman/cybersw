@@ -25,6 +25,7 @@ from homeassistant.const import (
     STATE_ON,
     STATE_OFF,
     STATE_UNKNOWN,
+    EntityCategory,
     UnitOfTime,
 )
 from homeassistant.core import HomeAssistant, callback
@@ -109,6 +110,7 @@ class CyberswitchConnectionSensor(CyberswitchSensor):
     """Connection sensor of a CyberSW device."""
 
     _attr_device_class = SensorDeviceClass.ENUM
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_icon = "mdi:connection"
     _attr_name = "Connection"
     _attr_options = [
@@ -181,6 +183,7 @@ class CyberswitchBatteryLevelSensor(CyberswitchSensor):
     _attr_device_class = SensorDeviceClass.BATTERY
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(self, coordinator):
         """Pass coordinator to CoordinatorEntity."""
@@ -208,6 +211,7 @@ class CyberswitchUptimeSensor(CyberswitchSensor):
     _attr_device_class = SensorDeviceClass.DURATION
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = UnitOfTime.MILLISECONDS
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_entity_registry_enabled_default = False
     _attr_icon = "mdi:clock-digital"
     _attr_name = "Uptime"
