@@ -29,7 +29,7 @@ from homeassistant.const import (
     UnitOfTime,
 )
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers import entity_platform, config_validation as cv
+from homeassistant.helpers import entity_platform, config_validation as cv, device_registry
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -126,6 +126,7 @@ class CyberswitchConnectionSensor(CyberswitchSensor):
         self._device : CyberswitchDevice = config.device
         self._attr_unique_id = coordinator.config_entry.entry_id + "-conn"
         self._attr_device_info = DeviceInfo(
+            connections={ (device_registry.CONNECTION_BLUETOOTH, config.device.address) },
             identifiers={ (DOMAIN, config.device.address) },
 #            name=name,
 #            model=VERSION,
@@ -158,6 +159,7 @@ class CyberswitchSwitchStateSensor(CyberswitchSensor):
         self._device : CyberswitchDevice = config.device
         self._attr_unique_id = coordinator.config_entry.entry_id + "-state"
         self._attr_device_info = DeviceInfo(
+            connections={ (device_registry.CONNECTION_BLUETOOTH, config.device.address) },
             identifiers={ (DOMAIN, config.device.address) },
 #            name=name,
 #            model=VERSION,
@@ -192,6 +194,7 @@ class CyberswitchBatteryLevelSensor(CyberswitchSensor):
         self._device : CyberswitchDevice = config.device
         self._attr_unique_id = coordinator.config_entry.entry_id + "-battery"
         self._attr_device_info = DeviceInfo(
+            connections={ (device_registry.CONNECTION_BLUETOOTH, config.device.address) },
             identifiers={ (DOMAIN, config.device.address) },
 #            name=name,
 #            model=VERSION,
@@ -223,6 +226,7 @@ class CyberswitchUptimeSensor(CyberswitchSensor):
         self._device : CyberswitchDevice = config.device
         self._attr_unique_id = coordinator.config_entry.entry_id + "-uptime"
         self._attr_device_info = DeviceInfo(
+            connections={ (device_registry.CONNECTION_BLUETOOTH, config.device.address) },
             identifiers={ (DOMAIN, config.device.address) },
 #            name=name,
 #            model=VERSION,

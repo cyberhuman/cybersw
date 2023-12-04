@@ -34,7 +34,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers import entity_platform, config_validation as cv
+from homeassistant.helpers import entity_platform, config_validation as cv, device_registry
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
@@ -140,6 +140,7 @@ class CyberswitchSwitch(CoordinatorEntity, SwitchEntity, RestoreEntity):
         self._device : CyberswitchDevice = config.device
         self._attr_unique_id = coordinator.config_entry.entry_id
         self._attr_device_info = DeviceInfo(
+            connections={ (device_registry.CONNECTION_BLUETOOTH, config.device.address) },
             identifiers={ (DOMAIN, config.device.address) },
             name=name,
 #            model=VERSION,
@@ -264,6 +265,7 @@ class CyberswitchConnectionSwitch(CoordinatorEntity, SwitchEntity, RestoreEntity
         self._device : CyberswitchDevice = config.device
         self._attr_unique_id = coordinator.config_entry.entry_id + "-connection"
         self._attr_device_info = DeviceInfo(
+            connections={ (device_registry.CONNECTION_BLUETOOTH, config.device.address) },
             identifiers={ (DOMAIN, config.device.address) },
 #            name=name,
 #            model=VERSION,
