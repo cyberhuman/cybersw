@@ -14,6 +14,7 @@ from homeassistant.const import (
 )
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.selector import (
+    BooleanSelector,
     NumberSelector,
     NumberSelectorConfig,
     NumberSelectorMode,
@@ -94,6 +95,7 @@ class CyberswitchOptionsFlow(OptionsFlowWithConfigEntry):
                 switch_angle_midpoint=int(user_input["switch_angle_midpoint"]),
                 switch_angle_on=int(user_input["switch_angle_on"]),
                 switch_angle_off=int(user_input["switch_angle_off"]),
+                switch_inverted=bool(user_input["switch_inverted"]),
                 switch_delay_ms=int(user_input["switch_delay_ms"]),
                 connection_interval_ms=int(user_input["connection_interval_ms"])
             )
@@ -136,6 +138,10 @@ class CyberswitchOptionsFlow(OptionsFlowWithConfigEntry):
                             unit_of_measurement=DEGREE,
                         )
                     ),
+                    vol.Required(
+                        "switch_inverted",
+                        default=self._config.switch_inverted,
+                    ) : BooleanSelector(),
                     vol.Required(
                         "switch_delay_ms",
                         default=self._config.switch_delay_ms,
