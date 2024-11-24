@@ -194,18 +194,20 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
             self._pairing_task = self.hass.async_create_task(
                 self._async_wait_for_pairing_mode()
             )
+
+        if not self._pairing_task.done():
             return self.async_show_progress(
                 step_id="wait_for_pairing_mode",
                 progress_action="wait_for_pairing_mode",
+                progress_task=self._pairing_task,
             )
 
         try:
             await self._pairing_task
         except asyncio.TimeoutError:
-            self._pairing_task = None
             return self.async_show_progress_done(next_step_id="pairing_mode_timeout")
-
-        self._pairing_task = None
+        finally:
+            self._pairing_task = None
 
         return self.async_show_progress_done(next_step_id="wait_for_pairing")
 
@@ -230,6 +232,7 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
             return self.async_show_progress(
                 step_id="wait_for_pairing",
                 progress_action="wait_for_pairing",
+                progress_task=self._pairing_task,
             )
 
         try:
@@ -298,18 +301,13 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
             _LOGGER.info(f"{flags is not None=} is_device_in_pairing_mode={flags is not None and flags.is_pairing}")
             return flags is not None and flags.is_pairing
 
-        try:
-            await async_process_advertisements(
-                self.hass,
-                is_device_in_pairing_mode,
-                {"address": self._discovery.info.address},
-                BluetoothScanningMode.ACTIVE,
-                WAIT_FOR_PAIRING_TIMEOUT,
-            )
-        finally:
-            self.hass.async_create_task(
-                self.hass.config_entries.flow.async_configure(flow_id=self.flow_id)
-            )
+        await async_process_advertisements(
+            self.hass,
+            is_device_in_pairing_mode,
+            {"address": self._discovery.info.address},
+            BluetoothScanningMode.ACTIVE,
+            WAIT_FOR_PAIRING_TIMEOUT,
+        )
 
     async def _async_wait_for_pairing(self) -> None:
         """Wait until pairing is complete."""

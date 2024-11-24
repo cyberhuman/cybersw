@@ -63,9 +63,11 @@ class CyberswitchOptionsFlow(OptionsFlowWithConfigEntry):
             self._async_task = self.hass.async_create_task(
                 self._async_read_task()
             )
+        if not self._async_task.done():
             return self.async_show_progress(
                 step_id="device_config_wait_read",
                 progress_action="device_config_wait_read",
+                progress_task=self._async_task,
             )
         try:
             await self._async_task
@@ -176,9 +178,11 @@ class CyberswitchOptionsFlow(OptionsFlowWithConfigEntry):
             self._async_task = self.hass.async_create_task(
                 self._async_write_config_task()
             )
+        if not self._async_task.done():
             return self.async_show_progress(
                 step_id="device_config_wait_write",
                 progress_action="device_config_wait_write",
+                progress_task=self._async_task,
             )
         try:
             await self._async_task
@@ -206,9 +210,11 @@ class CyberswitchOptionsFlow(OptionsFlowWithConfigEntry):
             self._async_task = self.hass.async_create_task(
                 self._async_store_config_task()
             )
+        if not self._async_task.done():
             return self.async_show_progress(
                 step_id="device_config_wait_store",
                 progress_action="device_config_wait_store",
+                progress_task=self._async_task,
             )
         try:
             await self._async_task
@@ -236,9 +242,11 @@ class CyberswitchOptionsFlow(OptionsFlowWithConfigEntry):
             self._async_task = self.hass.async_create_task(
                 self._async_restore_config_task()
             )
+        if not self._async_task.done():
             return self.async_show_progress(
                 step_id="device_config_wait_restore",
                 progress_action="device_config_wait_restore",
+                progress_task=self._async_task,
             )
         try:
             await self._async_task
