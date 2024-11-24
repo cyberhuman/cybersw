@@ -62,7 +62,7 @@ class CyberswitchCoordinator(DataUpdateCoordinator[CyberswitchDeviceState]):
 #        except CyberswitchApiClientError as exception:
 #            raise UpdateFailed(exception) from exception
 #        try:
-#            # Note: asyncio.TimeoutError and aiohttp.ClientError are already
+#            # Note: TimeoutError and aiohttp.ClientError are already
 #            # handled by the data update coordinator.
 #            async with async_timeout.timeout(10):
 #                # Grab active context variables to limit data required to be fetched from API

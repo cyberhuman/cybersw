@@ -69,7 +69,7 @@ class CyberswitchOptionsFlow(OptionsFlowWithConfigEntry):
             )
         try:
             await self._async_task
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self._async_task = None
             return self.async_show_progress_done(next_step_id="read_timeout")
         self._async_task = None
@@ -182,7 +182,7 @@ class CyberswitchOptionsFlow(OptionsFlowWithConfigEntry):
             )
         try:
             await self._async_task
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self._async_task = None
             return self.async_show_progress_done(next_step_id="write_timeout")
         self._async_task = None
@@ -212,7 +212,7 @@ class CyberswitchOptionsFlow(OptionsFlowWithConfigEntry):
             )
         try:
             await self._async_task
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self._async_task = None
             return self.async_show_progress_done(next_step_id="store_timeout")
         self._async_task = None
@@ -242,7 +242,7 @@ class CyberswitchOptionsFlow(OptionsFlowWithConfigEntry):
             )
         try:
             await self._async_task
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self._async_task = None
             return self.async_show_progress_done(next_step_id="restore_timeout")
         self._async_task = None

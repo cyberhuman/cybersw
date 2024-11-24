@@ -204,7 +204,7 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
 
         try:
             await self._pairing_task
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return self.async_show_progress_done(next_step_id="pairing_mode_timeout")
         finally:
             self._pairing_task = None
@@ -240,7 +240,7 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
             finally:
                 _LOGGER.info("async_step_wait_for_pairing finalize")
                 self._pairing_task = None
-        except (asyncio.TimeoutError, DeviceDisappearedError, DevicePairingError) as exn:
+        except (TimeoutError, DeviceDisappearedError, DevicePairingError) as exn:
             _LOGGER.info(f"async_step_wait_for_pairing got error {exn=}")
             return self.async_show_progress_done(next_step_id="pairing_timeout")
         except Exception as exn:
