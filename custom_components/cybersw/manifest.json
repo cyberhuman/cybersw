@@ -22,5 +22,6 @@
     "events~=0.4",
     "transitions~=0.8.11"
   ],
-  "version": "0.0.1"
+  "version": "0.0.1",
+  "loggers": ["custom_components.cybersw"]
 }
