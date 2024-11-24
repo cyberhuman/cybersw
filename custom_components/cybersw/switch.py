@@ -251,7 +251,7 @@ class CyberswitchSwitch(CoordinatorEntity, SwitchEntity, RestoreEntity):
 class CyberswitchConnectionSwitch(CoordinatorEntity, SwitchEntity, RestoreEntity):
     """Switch representation of the connection to a CyberSW device."""
 
-    #_attr_has_entity_name = True
+    _attr_has_entity_name = True
     _attr_name = "Connection"
     #_attr_should_poll = False
     _attr_entity_registry_enabled_default = False
