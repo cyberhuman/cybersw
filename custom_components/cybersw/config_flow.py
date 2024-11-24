@@ -27,6 +27,7 @@ from homeassistant.components.bluetooth import (
 from homeassistant.config_entries import (
     ConfigEntry,
     ConfigFlow,
+    ConfigFlowResult,
     OptionsFlow,
 )
 from homeassistant.const import (
@@ -34,7 +35,6 @@ from homeassistant.const import (
     #CONF_NAME,
 )
 from homeassistant.core import callback
-from homeassistant.data_entry_flow import FlowResult
 
 from bleak_retry_connector import (
     BleakClientWithServiceCache,
@@ -93,7 +93,7 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_bluetooth(
         self, discovery_info: BluetoothServiceInfo
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle the bluetooth discovery step."""
         _LOGGER.info(f"discovered bluetooth device {discovery_info.address}")
         await self.async_set_unique_id(discovery_info.address)
@@ -106,7 +106,7 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_bluetooth_confirm(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Confirm discovery."""
         assert self._discovery is not None
 
@@ -128,7 +128,7 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle the user step to pick discovered device."""
         if user_input is not None:
             address = user_input[CONF_ADDRESS]
@@ -188,7 +188,7 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_wait_for_pairing_mode(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Wait for device to enter pairing mode."""
         if not self._pairing_task:
             self._pairing_task = self.hass.async_create_task(
@@ -213,7 +213,7 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_pairing_mode_timeout(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Inform the user that the device never entered pairing mode."""
         if user_input is not None:
             return await self.async_step_wait_for_pairing_mode()
@@ -223,7 +223,7 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_wait_for_pairing(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Wait for device to complete pairing."""
         if not self._pairing_task:
             self._pairing_task = self.hass.async_create_task(
@@ -251,7 +251,7 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_pairing_timeout(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Inform the user that the device failed pairing."""
         if user_input is not None:
             return await self.async_step_wait_for_pairing_mode()
@@ -261,7 +261,7 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_pairing_complete(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Create a configuration entry for a device that entered pairing mode."""
         assert self._discovery
 
@@ -272,7 +272,7 @@ class CyberswitchConfigFlow(ConfigFlow, domain=DOMAIN):
 
         return self._create_cyberswitch_entry(self._discovery)
 
-    def _create_cyberswitch_entry(self, discovery: DiscoveredCyberswitch) -> FlowResult:
+    def _create_cyberswitch_entry(self, discovery: DiscoveredCyberswitch) -> ConfigFlowResult:
         #assert discovery.device.display_name
         display_name = get_device_display_name(discovery.info.name, discovery.info.address)
         _LOGGER.info(f'_create_cyberswitch_entry {discovery=} {display_name=}')
